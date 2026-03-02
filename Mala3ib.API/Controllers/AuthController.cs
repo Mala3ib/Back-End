@@ -23,5 +23,13 @@ namespace Mala3ib.API.Controllers
 
             return result!.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> RefreshAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+        {
+            var refreshResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+
+            return refreshResult!.IsSuccess ? Ok(refreshResult.Value) : refreshResult.ToProblem();  
+        }
     }
 }
