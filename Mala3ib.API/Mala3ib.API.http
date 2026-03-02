@@ -1,6 +1,0 @@
-@Mala3ib.API_HostAddress = http://localhost:5088
-
-GET {{Mala3ib.API_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
