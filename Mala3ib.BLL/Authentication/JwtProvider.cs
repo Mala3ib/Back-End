@@ -43,5 +43,31 @@ namespace Mala3ib.BLL.Authentication
 
             return (token: new JwtSecurityTokenHandler().WriteToken(token), expiresIn: expiresIn * 60);
         }
+
+        public string? ValidateToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var symmeticSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key));
+
+            try
+            {
+                tokenHandler.ValidateToken(token, new TokenValidationParameters
+                {
+                    IssuerSigningKey = symmeticSecurityKey,
+                    ValidateIssuerSigningKey = true,
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero
+                }, out SecurityToken validatedToken);
+
+                var jwtToken = (JwtSecurityToken)validatedToken;
+
+                return jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
