@@ -1,4 +1,5 @@
 namespace Mala3ib.API;
+
 public class Program
 {
     public static void Main(string[] args)
@@ -7,7 +8,7 @@ public class Program
 
 
         builder.Services.AddDependencies(builder.Configuration);
-        
+
 
 
         var app = builder.Build();
@@ -16,7 +17,7 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
-            app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1")); 
+            app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
 
         }
 
@@ -26,7 +27,7 @@ public class Program
 
 
         app.MapControllers();
-       
+
         app.UseExceptionHandler();
 
         app.Run();
