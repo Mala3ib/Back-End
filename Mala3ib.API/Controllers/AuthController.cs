@@ -1,6 +1,4 @@
 ﻿using Mala3ib.BLL.Contracts.Authentication;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Mala3ib.API.Controllers
 {
@@ -17,7 +15,7 @@ namespace Mala3ib.API.Controllers
         }
 
         [HttpPost("")]
-        public async Task<IActionResult> Login(LoginRequest request, CancellationToken cancellation)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto request, CancellationToken cancellation)
         {
             var result = await _authService.GetTokenAsync(request.Email, request.Password, cancellation);
 
@@ -25,11 +23,27 @@ namespace Mala3ib.API.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> RefreshAsync(RefreshTokenRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> RefreshAsync([FromBody] RefreshTokenRequestDto request, CancellationToken cancellationToken)
         {
             var refreshResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
             return refreshResult!.IsSuccess ? Ok(refreshResult.Value) : refreshResult.ToProblem();  
+        }
+
+        [HttpPost("confirm-email")]
+        public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequestDto request)
+        {
+            var result = await _authService.ConfirmEmailAsync(request);
+
+            return result.IsSuccess ? Ok() : result.ToProblem();
+        }
+
+        [HttpPost("resend-confirmation-email")]
+        public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequestDto request)
+        {
+            var result = await _authService.ResendConfirmationEmailAsync(request);
+
+            return result.IsSuccess ? Ok() : result.ToProblem();
         }
     }
 }

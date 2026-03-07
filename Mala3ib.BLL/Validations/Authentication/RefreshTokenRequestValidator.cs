@@ -1,6 +1,6 @@
 ﻿namespace Mala3ib.BLL.Validations.Authentication
 {
-    public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenRequest>
+    public class RefreshTokenRequestValidator : AbstractValidator<RefreshTokenRequestDto>
     {
         public RefreshTokenRequestValidator()
         {

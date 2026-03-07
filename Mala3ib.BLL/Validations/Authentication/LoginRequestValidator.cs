@@ -1,7 +1,7 @@
 ﻿
 namespace Mala3ib.BLL.Validations.Authentication
 {
-    public class LoginRequestValidator : AbstractValidator<LoginRequest>
+    public class LoginRequestValidator : AbstractValidator<LoginRequestDto>
     {
         public LoginRequestValidator()
         {

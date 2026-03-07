@@ -1,6 +1,6 @@
 ﻿namespace Mala3ib.BLL.Contracts.Authentication
 {
-    public record AuthResponse(
+    public record AuthResponseDto(
         string Id,
         string? Email,
         string FirstName,
