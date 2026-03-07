@@ -172,7 +172,6 @@ namespace Mala3ib.BLL.Service.Implementation
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
-
         
     }
 }

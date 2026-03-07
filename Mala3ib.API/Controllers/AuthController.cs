@@ -32,7 +32,7 @@ namespace Mala3ib.API.Controllers
             return refreshResult!.IsSuccess ? Ok(refreshResult.Value) : refreshResult.ToProblem();  
         }
 
-        [HttpPost("register")]
+        [HttpPost("player-register")]
         public async Task<IActionResult> Register(RegisterPlayerDto request, CancellationToken cancellationToken)
         {
             var result = await _authService.RegisterPlayerAsync(request, cancellationToken);
@@ -53,7 +53,7 @@ namespace Mala3ib.API.Controllers
         {
             var result = await _authService.ResendConfirmationEmailAsync(request);
 
-            return result.IsSuccess ? Ok() : result.ToProblem();
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
     }
 }
