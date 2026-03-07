@@ -482,8 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
-
-**/bin\Debug/**
-**/bin\Release/**
-**/bin\**
+**/bin*/
+**/bin*/
+**/obj/
 .vscode/
+
+/Mala3ib.DAL/Migrations/
