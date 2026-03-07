@@ -1,5 +1,9 @@
-﻿using Mala3ib.BLL.Helpers;
+﻿using Hangfire;
+using Mala3ib.BLL.Helpers;
 using Mala3ib.BLL.Settings;
+using Mala3ib.DAL.Repo.Abstraction;
+using Mala3ib.DAL.Repo.Implementation;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace Mala3ib.API
 {
@@ -8,7 +12,8 @@ namespace Mala3ib.API
         public static IServiceCollection AddDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddAuthConfig(configuration)
-                    .AddValidationConfig();
+                    .AddValidationConfig()
+                    .AddBackGroundJobsConfig(configuration);
 
             services.AddControllers();
             services.AddOpenApi();
@@ -17,9 +22,15 @@ namespace Mala3ib.API
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
-            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailSender, EmailService>();
+            services.AddScoped<IEmailVerificationService, EmailVerificationService>();
+
             services.AddScoped<IAuthService, AuthService>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
+
+            #region Repo
+            services.AddScoped<IPlayerRepo, PlayerRepo>();
+            #endregion
 
             services.AddHttpContextAccessor();
             services.AddExceptionHandler<GlobaExceptionHandler>();
@@ -61,11 +72,19 @@ namespace Mala3ib.API
                     ValidateIssuer = true,
                     ValidateAudience = true,
                     ValidateLifetime = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("KTVcuuOTiQkGaFkwtoUe7BKR8rrE7CKo")),
-                    ValidIssuer = "Mala3ibApp",
-                    ValidAudience = "Mala3ibApp users"
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings!.Key)),
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience
                 };
             });
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequiredLength = 8;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.User.RequireUniqueEmail = true;
+            });
+
             return services;
         }
 
@@ -74,6 +93,18 @@ namespace Mala3ib.API
             // Diffrent Assembly
             services.AddBLL();
             services.AddFluentValidationAutoValidation();
+            return services;
+        }
+        public static IServiceCollection AddBackGroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+
+            services.AddHangfireServer();
+
             return services;
         }
     }

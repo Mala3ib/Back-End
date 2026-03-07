@@ -9,7 +9,14 @@ global using Mala3ib.DAL.Abstraction;
 global using Mala3ib.DAL.Entities;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Identity;
-global using Microsoft.AspNetCore.WebUtilities;
 global using System.Security.Cryptography;
 global using System.Text;
-
+global using Mala3ib.BLL.Contracts.Player;
+global using MailKit.Net.Smtp;
+global using MailKit.Security;
+global using Mala3ib.BLL.Settings;
+global using Microsoft.AspNetCore.Identity.UI.Services;
+global using Microsoft.Extensions.Options;
+global using MimeKit;
+global using Mala3ib.DAL.Database;
+global using Microsoft.EntityFrameworkCore;
