@@ -25,7 +25,7 @@
                 ExpirationTime = DateTime.UtcNow.AddMinutes(10)
             };
 
-            await SendUserOtpAsync(user, userOtps.Code);
+            await SendEmail(user, userOtps.Code);
 
             await _context.EmailVerficationOtps.AddAsync(userOtps);
             await _context.SaveChangesAsync();
@@ -64,7 +64,7 @@
             return random.Next(100000, 999999).ToString();
         }
 
-        private async Task SendUserOtpAsync(ApplicationUser user, string otp)
+        private async Task SendEmail(ApplicationUser user, string otp)
         {
 
             var emailBody = _emailBodyBuilder.GenerateEmailBody("EmailConfirmation.html",
