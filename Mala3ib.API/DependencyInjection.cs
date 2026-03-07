@@ -1,4 +1,7 @@
-﻿namespace Mala3ib.API
+﻿using Mala3ib.BLL.Helpers;
+using Mala3ib.BLL.Settings;
+
+namespace Mala3ib.API
 {
     public static class DependencyInjection
     {
@@ -14,9 +17,11 @@
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
 
+            services.AddHttpContextAccessor();
             services.AddExceptionHandler<GlobaExceptionHandler>();
             services.AddProblemDetails();
 
@@ -35,6 +40,10 @@
                 .BindConfiguration(JwtOptions.Name)
                 .ValidateDataAnnotations()
                 .ValidateOnStart();
+
+            // Mail Service
+            services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+            services.AddScoped<EmailBodyBuilder>();
 
             var jwtSettings = configuration.GetSection(JwtOptions.Name).Get<JwtOptions>();
 

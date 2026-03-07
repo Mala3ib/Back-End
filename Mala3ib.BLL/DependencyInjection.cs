@@ -4,9 +4,7 @@
     {
         public static IServiceCollection AddBLL(this IServiceCollection services)
         {
-            services.AddValidatorsFromAssembly(
-                typeof(DependencyInjection).Assembly);
-
+            services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
             return services;
         }
     }
