@@ -1,12 +1,6 @@
-﻿using MailKit.Net.Smtp;
-using MailKit.Security;
-using Mala3ib.BLL.Settings;
-using Microsoft.Extensions.Options;
-using MimeKit;
-
-namespace Mala3ib.BLL.Service.Implementation
+﻿namespace Mala3ib.BLL.Service.Implementation
 {
-    public class EmailService : IEmailService
+    public class EmailService : IEmailSender
     {
         private readonly MailSettings _mailSettings;
         public EmailService(IOptions<MailSettings> mailSettings)

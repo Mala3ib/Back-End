@@ -10,6 +10,7 @@ namespace Mala3ib.DAL.Database
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Player> Players { get; set; }
         public DbSet<FieldOwner> FieldOwners { get; set; }
+        public DbSet<EmailVerficationOtp> EmailVerficationOtps { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

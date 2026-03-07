@@ -1,3 +1,5 @@
+using Hangfire;
+
 namespace Mala3ib.API;
 
 public class Program
@@ -20,6 +22,8 @@ public class Program
             app.UseSwaggerUI(options => options.SwaggerEndpoint("/openapi/v1.json", "v1"));
 
         }
+
+        app.UseHangfireDashboard("/Jobs");
 
         app.UseHttpsRedirection();
 

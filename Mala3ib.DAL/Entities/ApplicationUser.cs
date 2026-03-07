@@ -11,5 +11,6 @@ namespace Mala3ib.DAL.Entities
 
         public Role Role { get; set; }
         public List<RefreshToken> RefreshTokens { get; set; } = [];
+        public List<EmailVerficationOtp> EmailVerficationOtps = [];
     }
 }

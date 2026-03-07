@@ -1,25 +1,25 @@
-﻿namespace Mala3ib.BLL.Service.Implementation
+﻿using Hangfire;
+using Mala3ib.DAL.Repo.Abstraction;
+
+namespace Mala3ib.BLL.Service.Implementation
 {
     public class AuthService : IAuthService
     {
         private readonly IJwtProvider _jwtProvider;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly IEmailService _emailService;
-        private readonly EmailBodyBuilder _emailBodyBuilder;
+        private readonly IEmailVerificationService _emailVerificationService;
+        private readonly IPlayerRepo _playerRepo;
 
         private readonly int _refreshTokenExpiryDays = 14;
         public AuthService(IJwtProvider jwtProvider,
             UserManager<ApplicationUser> userManager,
-            IHttpContextAccessor httpContextAccessor,
-            IEmailService emailService,
-            EmailBodyBuilder emailBodyBuilder)
+            IEmailVerificationService emailVerificationService,
+            IPlayerRepo playerRepo)
         {
             _jwtProvider = jwtProvider;
             _userManager = userManager;
-            _httpContextAccessor = httpContextAccessor;
-            _emailService = emailService;
-            _emailBodyBuilder = emailBodyBuilder;
+            _emailVerificationService = emailVerificationService;
+            _playerRepo = playerRepo;
         }
 
         public async Task<Result<AuthResponseDto>?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -28,6 +28,9 @@
 
             if (user is null)
                 return Result.Failure<AuthResponseDto>(UserErrors.InvalidCredentials);
+
+            if (!user.EmailConfirmed)
+                return Result.Failure<AuthResponseDto>(UserErrors.EmailNotConfirmed);
 
             var isValidPassword = await _userManager.CheckPasswordAsync(user, password);
 
@@ -45,13 +48,6 @@
                 ExpiresOn = refreshTokenExpiration
             });
             await _userManager.UpdateAsync(user);
-
-
-            // For Test 
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-            await SendConfirmationEmail(user,code);
 
             return Result.Success(new AuthResponseDto(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration));
         }
@@ -106,6 +102,44 @@
             return Result.Success();
         }
 
+
+        public async Task<Result<RegisterReponseDto>> RegisterPlayerAsync(RegisterPlayerDto request, CancellationToken cancellationToken = default)
+        {
+            var emailIsExists = await _userManager.Users.AnyAsync(e => e.Email == request.Email);
+
+            if (emailIsExists)
+                return Result.Failure<RegisterReponseDto>(UserErrors.DuplicatedEmail);
+
+            var user = new ApplicationUser
+            {
+                Email = request.Email,
+                UserName = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+            };
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+
+            if(result.Succeeded)
+            {
+                var player = new Player
+                {
+                    UserId = user.Id,
+                    Image = request.Image,
+                    DateOfBirth = request.DateOfBirth
+                };
+
+                await _playerRepo.AddAsync(player);
+
+                BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendOtpAsync(user));
+
+                return Result.Success(new RegisterReponseDto(user.Id));
+            }
+
+            var error = result.Errors.First();
+            return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+        }
+
         public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequestDto request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
@@ -116,66 +150,29 @@
             if (user.EmailConfirmed)
                 return Result.Failure(UserErrors.DuplicatedConfirmation);
 
-            var code = request.Code;
-
-            try
-            {
-                code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            }
-            catch(FormatException)
-            {
-                return Result.Failure(UserErrors.InvalidCode);
-            }
-
-            var result = await _userManager.ConfirmEmailAsync(user, code);
-            if (result.Succeeded)
-            {
-                return Result.Success();
-            }
-
-            var error = result.Errors.First();
-            return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+            return await _emailVerificationService.VerifyEmailAsync(user, request.Code);
         }
 
-        public async Task<Result> ResendConfirmationEmailAsync(ResendConfirmationEmailRequestDto request)
+        public async Task<Result<RegisterReponseDto>> ResendConfirmationEmailAsync(ResendConfirmationEmailRequestDto request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
 
             if (user is null)
-                return Result.Success();   // تضليل ال User
+                return Result.Success(new RegisterReponseDto( ""));   
 
             if (user.EmailConfirmed)
-                return Result.Failure(UserErrors.DuplicatedConfirmation);
+                return Result.Failure<RegisterReponseDto>(UserErrors.DuplicatedConfirmation);
 
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendOtpAsync(user));
 
-
-            // TODO : Send Email
-            await SendConfirmationEmail(user, code);
-
-            return Result.Success();
-        }
-        private async Task SendConfirmationEmail(ApplicationUser user, string code)
-        {
-            var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
-
-            var confirmationLink = $"{origin}/auth/emailConfirmation?userId={user.Id}&code={code}";
-
-            var emailBody =_emailBodyBuilder.GenerateEmailBody("EmailConfirmation.html",
-            new Dictionary<string, string>
-            {
-                { "{{UserName}}" , $"{user.FirstName} {user.LastName}" },
-                { "{{action_url}}", confirmationLink }
-            });
-
-            await _emailService.SendEmailAsync(user.Email!, "✅ Confirm your Mala3ib account",emailBody);
+            return Result.Success(new RegisterReponseDto(user.Id));
         }
         
         private static string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
+
         
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Mala3ib.BLL.Contracts.Authentication;
+using Mala3ib.BLL.Contracts.Player;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace Mala3ib.API.Controllers
 {
@@ -28,6 +30,14 @@ namespace Mala3ib.API.Controllers
             var refreshResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
 
             return refreshResult!.IsSuccess ? Ok(refreshResult.Value) : refreshResult.ToProblem();  
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterPlayerDto request, CancellationToken cancellationToken)
+        {
+            var result = await _authService.RegisterPlayerAsync(request, cancellationToken);
+
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
 
         [HttpPost("confirm-email")]
