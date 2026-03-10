@@ -1,5 +1,6 @@
 ﻿using Hangfire;
 using Mala3ib.DAL.Repo.Abstraction;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace Mala3ib.BLL.Service.Implementation
 {
@@ -131,7 +132,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
                 await _playerRepo.AddAsync(player);
 
-                BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendOtpAsync(user));
+                BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendEmailVerificationOtpAsync(user));
 
                 return Result.Success(new RegisterReponseDto(user.Id));
             }
@@ -150,7 +151,7 @@ namespace Mala3ib.BLL.Service.Implementation
             if (user.EmailConfirmed)
                 return Result.Failure(UserErrors.DuplicatedConfirmation);
 
-            return await _emailVerificationService.VerifyEmailAsync(user, request.Code);
+            return await _emailVerificationService.VerifyEmailOtpAsync(user, request.Code);
         }
 
         public async Task<Result<RegisterReponseDto>> ResendConfirmationEmailAsync(ResendConfirmationEmailRequestDto request)
@@ -163,11 +164,53 @@ namespace Mala3ib.BLL.Service.Implementation
             if (user.EmailConfirmed)
                 return Result.Failure<RegisterReponseDto>(UserErrors.DuplicatedConfirmation);
 
-            BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendOtpAsync(user));
+            BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendEmailVerificationOtpAsync(user));
 
             return Result.Success(new RegisterReponseDto(user.Id));
         }
-        
+
+        public async Task<Result> SendResetPasswordCodeAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null)
+                return Result.Success(); // misleadin user
+
+            if (!user.EmailConfirmed)
+                return Result.Failure(UserErrors.EmailNotConfirmed);
+
+            BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendForgetPasswordOtpAsync(user));
+
+            return Result.Success();
+        }
+
+        public async Task<Result> ResetPasswordAsync(ResetPasswordRequestDto request)
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+
+            if (user is null)
+                return Result.Failure(UserErrors.InvalidCredentials);
+
+            var otpResult = await _emailVerificationService
+                .VerifyForgetPasswordOtpAsync(user, request.Code);
+
+            if (otpResult.IsFailure)
+                return otpResult;
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var resetResult = await _userManager.ResetPasswordAsync(user,token,request.NewPassword);
+
+            if (!resetResult.Succeeded)
+            {
+                var error = resetResult.Errors.First();
+
+                return Result.Failure(new Error(error.Code,error.Description,StatusCodes.Status400BadRequest));
+            }
+
+            return Result.Success();
+        }
+
         private static string GenerateRefreshToken()
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));

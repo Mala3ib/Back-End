@@ -2,7 +2,10 @@
 {
     public interface IEmailVerificationService
     {
-        Task SendOtpAsync(ApplicationUser user);
-        Task<Result> VerifyEmailAsync(ApplicationUser user, string code);
+        Task SendEmailVerificationOtpAsync(ApplicationUser user);
+        Task SendForgetPasswordOtpAsync(ApplicationUser user);
+
+        Task<Result> VerifyEmailOtpAsync(ApplicationUser user, string code);
+        Task<Result> VerifyForgetPasswordOtpAsync(ApplicationUser user, string code);
     }
 }
