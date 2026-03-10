@@ -32,6 +32,14 @@ namespace Mala3ib.API.Controllers
             return refreshResult!.IsSuccess ? Ok(refreshResult.Value) : refreshResult.ToProblem();  
         }
 
+        [HttpPut("revoke-refresh-token")]
+        public async Task<IActionResult> RevokeRefresh([FromBody] RefreshTokenRequestDto request, CancellationToken cancellationToken)
+        {
+            var result = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
+
+            return result.IsSuccess ? Ok() : result.ToProblem();
+        }
+
         [HttpPost("player-register")]
         public async Task<IActionResult> Register(RegisterPlayerDto request, CancellationToken cancellationToken)
         {
@@ -54,6 +62,22 @@ namespace Mala3ib.API.Controllers
             var result = await _authService.ResendConfirmationEmailAsync(request);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+
+        [HttpPost("forget-password")]
+        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequestDto request)
+        {
+            var result = await _authService.SendResetPasswordCodeAsync(request.Email);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto request)
+        {
+            var result = await _authService.ResetPasswordAsync(request);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
         }
     }
 }
