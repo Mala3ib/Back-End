@@ -1,6 +1,5 @@
 ﻿using Hangfire;
 using Mala3ib.DAL.Repo.Abstraction;
-using Microsoft.AspNetCore.Identity.Data;
 
 namespace Mala3ib.BLL.Service.Implementation
 {
@@ -121,7 +120,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
             var result = await _userManager.CreateAsync(user, request.Password);
 
-            if(result.Succeeded)
+            if (result.Succeeded)
             {
                 var player = new Player
                 {
@@ -159,7 +158,7 @@ namespace Mala3ib.BLL.Service.Implementation
             var user = await _userManager.FindByEmailAsync(request.Email);
 
             if (user is null)
-                return Result.Success(new RegisterReponseDto( ""));   
+                return Result.Success(new RegisterReponseDto(""));
 
             if (user.EmailConfirmed)
                 return Result.Failure<RegisterReponseDto>(UserErrors.DuplicatedConfirmation);
@@ -199,13 +198,13 @@ namespace Mala3ib.BLL.Service.Implementation
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-            var resetResult = await _userManager.ResetPasswordAsync(user,token,request.NewPassword);
+            var resetResult = await _userManager.ResetPasswordAsync(user, token, request.NewPassword);
 
             if (!resetResult.Succeeded)
             {
                 var error = resetResult.Errors.First();
 
-                return Result.Failure(new Error(error.Code,error.Description,StatusCodes.Status400BadRequest));
+                return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
             }
 
             return Result.Success();
@@ -215,6 +214,6 @@ namespace Mala3ib.BLL.Service.Implementation
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
-        
+
     }
 }
