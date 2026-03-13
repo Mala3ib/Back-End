@@ -19,9 +19,9 @@ namespace Mala3ib.DAL.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-            
+
             base.OnModelCreating(modelBuilder);
-            
+
             // Application User with Admin & FieldOwner & Player
             modelBuilder.Entity<Player>()
                 .HasOne(p => p.User)
@@ -40,7 +40,7 @@ namespace Mala3ib.DAL.Database
                 .WithOne(u => u.Admin)
                 .HasForeignKey<Admin>(a => a.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-            
+
             // Fields & FieldOwner
             modelBuilder.Entity<Field>()
                 .HasOne(f => f.FieldOwner)
@@ -67,7 +67,7 @@ namespace Mala3ib.DAL.Database
                 .HasOne(m => m.Player)
                 .WithMany(p => p.CreatedMatches)
                 .HasForeignKey(m => m.CreatorPlayerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Match>()
                 .HasOne(m => m.Field)
@@ -79,7 +79,7 @@ namespace Mala3ib.DAL.Database
                 .HasOne(m => m.FieldSlot)
                 .WithMany()
                 .HasForeignKey(m => m.FieldSlotId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Bookings
             modelBuilder.Entity<Booking>()
@@ -92,7 +92,7 @@ namespace Mala3ib.DAL.Database
                 .HasOne(b => b.Player)
                 .WithMany(p => p.Bookings)
                 .HasForeignKey(b => b.PlayerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // Payments
             modelBuilder.Entity<Payment>()
@@ -112,13 +112,13 @@ namespace Mala3ib.DAL.Database
                 .HasOne(i => i.Sender)
                 .WithMany(p => p.SentInvitations)
                 .HasForeignKey(i => i.SenderId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Invitation>()
                 .HasOne(i => i.Receiver)
                 .WithMany(p => p.ReceivedInvitations)
                 .HasForeignKey(i => i.ReceiverId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // FieldReviews
             modelBuilder.Entity<FieldReview>()
@@ -131,7 +131,7 @@ namespace Mala3ib.DAL.Database
                 .HasOne(fr => fr.Player)
                 .WithMany(p => p.FieldReviews)
                 .HasForeignKey(fr => fr.PlayerId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
