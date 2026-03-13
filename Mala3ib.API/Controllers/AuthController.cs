@@ -41,7 +41,7 @@ namespace Mala3ib.API.Controllers
         }
 
         [HttpPost("player-register")]
-        public async Task<IActionResult> Register(RegisterPlayerDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Register([FromBody] RegisterPlayerDto request, CancellationToken cancellationToken)
         {
             var result = await _authService.RegisterPlayerAsync(request, cancellationToken);
 
@@ -68,6 +68,14 @@ namespace Mala3ib.API.Controllers
         public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordRequestDto request)
         {
             var result = await _authService.SendResetPasswordCodeAsync(request.Email);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+
+        [HttpPost("verify-reset-password-otp")]
+        public async Task<IActionResult> VerifyResetPasswordOtp([FromBody] VerifyResetPasswordOtpRequestDto request)
+        {
+            var result = await _authService.VerifyResetPasswordOtpAsync(request.Email, request.Otp);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }

@@ -8,9 +8,6 @@
             .NotEmpty()
             .EmailAddress();
 
-            RuleFor(x => x.Code)
-                .NotEmpty();
-
             RuleFor(x => x.NewPassword)
                 .NotEmpty()
                 .Matches(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z0-9]).{8,}$")
