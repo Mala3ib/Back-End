@@ -116,6 +116,7 @@ namespace Mala3ib.BLL.Service.Implementation
                 UserName = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber,
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -183,18 +184,27 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success();
         }
 
+        public async Task<Result> VerifyResetPasswordOtpAsync(string email, string otp)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null)
+                return Result.Failure(UserErrors.InvalidCredentials);
+
+            var isValidOtp = await _emailVerificationService.VerifyForgetPasswordOtpAsync(user, otp);
+
+            if(isValidOtp.IsFailure)
+                return Result.Failure(new Error("Invalid.Otp", "The verification code is incorrect.", StatusCodes.Status401Unauthorized));
+
+            return Result.Success();
+        }
+
         public async Task<Result> ResetPasswordAsync(ResetPasswordRequestDto request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
 
             if (user is null)
                 return Result.Failure(UserErrors.InvalidCredentials);
-
-            var otpResult = await _emailVerificationService
-                .VerifyForgetPasswordOtpAsync(user, request.Code);
-
-            if (otpResult.IsFailure)
-                return otpResult;
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 

@@ -2,7 +2,6 @@
 {
     public record ResetPasswordRequestDto(
         string Email,
-        string Code,
         string NewPassword
     );
 }

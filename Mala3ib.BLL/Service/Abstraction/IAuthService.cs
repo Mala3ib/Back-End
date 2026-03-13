@@ -17,6 +17,7 @@ namespace Mala3ib.BLL.Service.Abstraction
 
         #region Forget Password
         Task<Result> SendResetPasswordCodeAsync(string email);
+        Task<Result> VerifyResetPasswordOtpAsync(string email, string otp);
         Task<Result> ResetPasswordAsync(ResetPasswordRequestDto request);
         #endregion
     }
