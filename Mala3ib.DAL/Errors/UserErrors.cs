@@ -1,0 +1,25 @@
+﻿using Mala3ib.DAL.Enums;
+
+namespace Mala3ib.DAL.Errors
+{
+    public static class UserErrors
+    {
+        public static Error InvalidCredentials
+            = new Error("User.InvalidCredentials", "Invalid email or password", ErrorType.Unauthorized);
+
+        public static readonly Error InvalidTokens
+           = new Error("User.InvalidCredentials", "Invalid token or resfresh token", ErrorType.Unauthorized);
+
+        public static readonly Error DuplicatedEmail
+            = new Error("User.DuplicatedEmail", "Another user with the same emial is already exists", ErrorType.Conflict);
+
+        public static readonly Error EmailNotConfirmed
+           = new Error("User.EmailNotConfirmed", "Email is not confirmed", ErrorType.Unauthorized);
+
+        public static readonly Error InvalidCode
+        = new Error("User.InvalidCode", "Invalid code", ErrorType.Unauthorized);
+
+        public static readonly Error DuplicatedConfirmation
+                = new Error("User.DuplicatedConfirmation", "Email is already confirmed", ErrorType.BadRequest);
+    }
+}

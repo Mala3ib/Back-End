@@ -9,10 +9,7 @@ namespace Mala3ib.DAL.Entities
         public bool IsDeleted { get; set; } = false;
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = default!;
-        public ICollection<Match> CreatedMatches { get; set; } = new List<Match>();
-        public ICollection<Booking> Bookings { get; set; }  = new List<Booking>();
-        public ICollection<Invitation> SentInvitations { get; set; }  = new List<Invitation>();
-        public ICollection<Invitation> ReceivedInvitations { get; set; }  = new List<Invitation>();
         public ICollection<FieldReview> FieldReviews { get; set; } = new List<FieldReview>();
+        public ICollection<Player> Friends { get; set; } = new List<Player>();
     }
 }

@@ -10,7 +10,8 @@ namespace Mala3ib.BLL.Service.Abstraction
         #endregion
 
         #region Regisertation and Comfirmation Email
-        Task<Result<RegisterReponseDto>> RegisterPlayerAsync(RegisterPlayerDto request, CancellationToken cancellationToken = default);        
+        Task<Result<RegisterReponseDto>> RegisterPlayerAsync(RegisterPlayerDto request, CancellationToken cancellationToken = default);
+        Task<Result<RegisterReponseDto>> RegisterFieldOwnerAsync(RegisterFieldOwnerDto request, CancellationToken cancellationToken = default);
         Task<Result> ConfirmEmailAsync(ConfirmEmailRequestDto request);
         Task<Result<RegisterReponseDto>> ResendConfirmationEmailAsync(ResendConfirmationEmailRequestDto request);
         #endregion
