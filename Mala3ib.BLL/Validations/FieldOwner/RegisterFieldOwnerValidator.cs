@@ -1,10 +1,8 @@
-﻿using Mala3ib.BLL.Contracts.Player;
-
-namespace Mala3ib.BLL.Validations.Player
+﻿namespace Mala3ib.BLL.Validations.FieldOwner
 {
-    public class RegisterPlayerValidator : AbstractValidator<RegisterPlayerDto>
+    public class RegisterFieldOwnerValidator : AbstractValidator<RegisterFieldOwnerDto>
     {
-        public RegisterPlayerValidator()
+        public RegisterFieldOwnerValidator()
         {
             RuleFor(x => x.Email)
                 .NotEmpty()

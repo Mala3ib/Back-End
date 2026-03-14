@@ -3,7 +3,10 @@ using Mala3ib.BLL.Helpers;
 using Mala3ib.BLL.Settings;
 using Mala3ib.DAL.Repo.Abstraction;
 using Mala3ib.DAL.Repo.Implementation;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using System.Reflection;
 
 namespace Mala3ib.API
 {
@@ -30,6 +33,11 @@ namespace Mala3ib.API
 
             #region Repo
             services.AddScoped<IPlayerRepo, PlayerRepo>();
+            services.AddScoped<IFieldOwnerRepo, FieldOwnerRepo>();
+            #endregion
+
+            #region Service
+            services.AddScoped<IPlayerService, PlayerService>();
             #endregion
 
             services.AddHttpContextAccessor();
@@ -91,8 +99,14 @@ namespace Mala3ib.API
         public static IServiceCollection AddValidationConfig(this IServiceCollection services)
         {
             // Diffrent Assembly
-            services.AddBLL();
+            services.AddBLLValidation();
             services.AddFluentValidationAutoValidation();
+            return services;
+        }
+        public static IServiceCollection AddMappingConfig(this IServiceCollection services)
+        {
+            // Diffrent Assembly
+            services.AddBLLMapping();
             return services;
         }
         public static IServiceCollection AddBackGroundJobsConfig(this IServiceCollection services, IConfiguration configuration)

@@ -1,4 +1,5 @@
 ﻿using Mala3ib.BLL.Contracts.Authentication;
+using Mala3ib.BLL.Contracts.FieldOwner;
 using Mala3ib.BLL.Contracts.Player;
 using Microsoft.AspNetCore.Identity.Data;
 
@@ -41,9 +42,17 @@ namespace Mala3ib.API.Controllers
         }
 
         [HttpPost("player-register")]
-        public async Task<IActionResult> Register([FromBody] RegisterPlayerDto request, CancellationToken cancellationToken)
+        public async Task<IActionResult> PlayerRegistration([FromBody] RegisterPlayerDto request, CancellationToken cancellationToken)
         {
             var result = await _authService.RegisterPlayerAsync(request, cancellationToken);
+
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+
+        [HttpPost("field-owner-register")]
+        public async Task<IActionResult> FieldOwnerRegistration([FromBody] RegisterFieldOwnerDto request, CancellationToken cancellationToken)
+        {
+            var result = await _authService.RegisterFieldOwnerAsync(request, cancellationToken);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }

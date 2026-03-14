@@ -1,7 +1,4 @@
-﻿using Hangfire;
-using Mala3ib.DAL.Repo.Abstraction;
-
-namespace Mala3ib.BLL.Service.Implementation
+﻿namespace Mala3ib.BLL.Service.Implementation
 {
     public class AuthService : IAuthService
     {
@@ -9,24 +6,27 @@ namespace Mala3ib.BLL.Service.Implementation
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailVerificationService _emailVerificationService;
         private readonly IPlayerRepo _playerRepo;
+        private readonly IFieldOwnerRepo _fieldOwnerRepo;
 
         private readonly int _refreshTokenExpiryDays = 14;
         public AuthService(IJwtProvider jwtProvider,
             UserManager<ApplicationUser> userManager,
             IEmailVerificationService emailVerificationService,
-            IPlayerRepo playerRepo)
+            IPlayerRepo playerRepo,
+            IFieldOwnerRepo fieldOwnerRepo)
         {
             _jwtProvider = jwtProvider;
             _userManager = userManager;
             _emailVerificationService = emailVerificationService;
             _playerRepo = playerRepo;
+            _fieldOwnerRepo = fieldOwnerRepo;
         }
 
         public async Task<Result<AuthResponseDto>?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
-            if (user is null)
+            if (user is null || user.IsDeleted)
                 return Result.Failure<AuthResponseDto>(UserErrors.InvalidCredentials);
 
             if (!user.EmailConfirmed)
@@ -102,10 +102,9 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success();
         }
 
-
         public async Task<Result<RegisterReponseDto>> RegisterPlayerAsync(RegisterPlayerDto request, CancellationToken cancellationToken = default)
         {
-            var emailIsExists = await _userManager.Users.AnyAsync(e => e.Email == request.Email);
+            var emailIsExists = await _userManager.Users.AnyAsync(e => e.Email == request.Email, cancellationToken);
 
             if (emailIsExists)
                 return Result.Failure<RegisterReponseDto>(UserErrors.DuplicatedEmail);
@@ -116,7 +115,7 @@ namespace Mala3ib.BLL.Service.Implementation
                 UserName = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                PhoneNumber = request.PhoneNumber,
+                PhoneNumber = request.PhoneNumber
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -138,9 +137,48 @@ namespace Mala3ib.BLL.Service.Implementation
             }
 
             var error = result.Errors.First();
-            return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+            return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, ErrorType.BadRequest));
         }
 
+
+        public async Task<Result<RegisterReponseDto>> RegisterFieldOwnerAsync(RegisterFieldOwnerDto request, CancellationToken cancellationToken = default)
+        {
+            var emailIsExists = await _userManager.Users.AnyAsync(e => e.Email == request.Email, cancellationToken);
+
+            if (emailIsExists)
+                return Result.Failure<RegisterReponseDto>(UserErrors.DuplicatedEmail);
+
+            var user = new ApplicationUser
+            {
+                Email = request.Email,
+                UserName = request.Email,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
+                PhoneNumber = request.PhoneNumber
+            };
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+
+            if (result.Succeeded)
+            {
+                var fieldOwner = new FieldOwner
+                {
+                    UserId = user.Id,
+                    Image = request.Image,
+                    DateOfBirth = request.DateOfBirth,
+                    IsApproved = FieldStatus.Pending
+                };
+
+                await _fieldOwnerRepo.AddAsync(fieldOwner);
+
+                BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendEmailVerificationOtpAsync(user));
+
+                return Result.Success(new RegisterReponseDto(user.Id));
+            }
+
+            var error = result.Errors.First();
+            return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, ErrorType.BadRequest));
+        }
         public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequestDto request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
@@ -194,7 +232,7 @@ namespace Mala3ib.BLL.Service.Implementation
             var isValidOtp = await _emailVerificationService.VerifyForgetPasswordOtpAsync(user, otp);
 
             if(isValidOtp.IsFailure)
-                return Result.Failure(new Error("Invalid.Otp", "The verification code is incorrect.", StatusCodes.Status401Unauthorized));
+                return Result.Failure(new Error("Invalid.Otp", "The verification code is incorrect.", ErrorType.Unauthorized));
 
             return Result.Success();
         }
@@ -214,7 +252,7 @@ namespace Mala3ib.BLL.Service.Implementation
             {
                 var error = resetResult.Errors.First();
 
-                return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+                return Result.Failure(new Error(error.Code, error.Description, ErrorType.BadRequest));
             }
 
             return Result.Success();

@@ -71,16 +71,16 @@ namespace Mala3ib.BLL.Service.Implementation
             .FirstOrDefaultAsync();
 
         if (userOtp is null)
-            return Result.Failure(new Error("Invalid.Otp", "Invalid verification code", StatusCodes.Status401Unauthorized));
+            return Result.Failure(new Error("Invalid.Otp", "Invalid verification code", ErrorType.Unauthorized));
 
         if (userOtp.IsUsed)
-            return Result.Failure(new Error("Invalid.Otp", "This verification code has already been used.", StatusCodes.Status401Unauthorized));
+            return Result.Failure(new Error("Invalid.Otp", "This verification code has already been used.", ErrorType.Unauthorized));
 
         if (userOtp.ExpirationTime < DateTime.UtcNow)
-            return Result.Failure(new Error("Invalid.Otp", "The verification code has expired.", StatusCodes.Status401Unauthorized));
+            return Result.Failure(new Error("Invalid.Otp", "The verification code has expired.", ErrorType.Unauthorized));
 
         if (userOtp.Code != code)
-            return Result.Failure(new Error("Invalid.Otp", "The verification code is incorrect.", StatusCodes.Status401Unauthorized));
+            return Result.Failure(new Error("Invalid.Otp", "The verification code is incorrect.", ErrorType.Unauthorized));
 
         userOtp.IsUsed = true;
 

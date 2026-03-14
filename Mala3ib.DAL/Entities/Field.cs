@@ -11,7 +11,6 @@ namespace Mala3ib.DAL.Entities
         public FieldOwner FieldOwner { get; set; } = default!;
         public ICollection<FieldImage> Images { get; set; } =  new List<FieldImage>();
         public ICollection<FieldSlot> Slots { get; set; }  =  new List<FieldSlot>();
-        public ICollection<Match> Matches { get; set; }  = new List<Match>();
         public ICollection<FieldReview> Reviews { get; set; }   = new List<FieldReview>();
     }
 }
