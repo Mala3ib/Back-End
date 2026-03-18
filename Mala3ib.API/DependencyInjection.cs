@@ -38,6 +38,7 @@ namespace Mala3ib.API
 
             #region Service
             services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IFieldOwnerService, FieldOwnerService>();
             #endregion
 
             services.AddHttpContextAccessor();
