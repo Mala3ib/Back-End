@@ -19,9 +19,9 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.Players.AddAsync(player);
 
             await _context.SaveChangesAsync();
-        }      
+        }
 
-        public  IQueryable<Player> Get(string userId)
+        public IQueryable<Player> Get(string userId)
         {
             var player = _context.Players
                 .Where(x => x.UserId == userId)
@@ -59,8 +59,8 @@ namespace Mala3ib.DAL.Repo.Implementation
         public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
         {
             var isExist = await _context.Players.AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
-            
-            if(!isExist)
+
+            if (!isExist)
                 return Result.Failure(PlayerErrors.NotFound);
 
             var player = _context.Players
@@ -74,6 +74,6 @@ namespace Mala3ib.DAL.Repo.Implementation
             return Result.Success();
         }
 
-      
+
     }
 }

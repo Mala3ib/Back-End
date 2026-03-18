@@ -14,7 +14,7 @@ namespace Mala3ib.BLL.Service.Implementation
         public async Task<Result<PlayerProfileDto>> GetAsync(string userId, CancellationToken cancellation = default)
         {
             var player = await _playerRepo.Get(userId)
-                .Select(p => new PlayerProfileDto (
+                .Select(p => new PlayerProfileDto(
                     p.User.Email!,
                     p.User.FirstName,
                     p.User.LastName,
@@ -29,7 +29,7 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success(player);
         }
 
-        public async Task<Result> UpdateAsync(string userId ,UpdatePlayerRequestDto request, CancellationToken cancellation = default)
+        public async Task<Result> UpdateAsync(string userId, UpdatePlayerRequestDto request, CancellationToken cancellation = default)
         {
             var player = new Player
             {
@@ -51,7 +51,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
             var result = await _userManager.ChangePasswordAsync(user!, request.CurrentPassword, request.NewPassword);
 
-            if(result.Succeeded)
+            if (result.Succeeded)
             {
                 return Result.Success();
             }
@@ -65,6 +65,6 @@ namespace Mala3ib.BLL.Service.Implementation
             return await _playerRepo.DeleteAsync(userId, cancellation);
         }
 
-       
+
     }
 }
