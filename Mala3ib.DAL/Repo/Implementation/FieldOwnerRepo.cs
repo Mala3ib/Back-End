@@ -73,5 +73,9 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.SaveChangesAsync(cancellation);
             return Result.Success();
         }
+        public IQueryable<FieldOwner> GetOwnerByUserId(string userId)
+        {
+            return _context.FieldOwners.Where(o => o.UserId == userId);
+        }
     }
 }
