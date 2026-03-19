@@ -6,7 +6,6 @@ namespace Mala3ib.DAL.Entities
     {
         public int Id { get; set; }
         public bool IsDeleted { get; set; } = false;
-        public string? NationalId { get; set; }
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = default!;
     }

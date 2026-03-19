@@ -1,9 +1,4 @@
-﻿using Mala3ib.BLL.Contracts.Follow;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-
-namespace Mala3ib.API.Controllers
+﻿namespace Mala3ib.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]

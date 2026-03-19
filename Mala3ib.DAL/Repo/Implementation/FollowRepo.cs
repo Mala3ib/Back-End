@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Mala3ib.DAL.Repo.Implementation
+﻿namespace Mala3ib.DAL.Repo.Implementation
 {
     public class FollowRepo : IFollowRepo
     {
@@ -27,6 +25,7 @@ namespace Mala3ib.DAL.Repo.Implementation
                     return Result.Failure(FollowErrors.AlreadyFollowing);
 
                 // Restore soft deleted
+
                 follow.IsDeleted = false;
                 follow.CreatedAt = DateTime.UtcNow;
 
@@ -96,6 +95,7 @@ namespace Mala3ib.DAL.Repo.Implementation
                 .Select(x => x.Follower)
                 .AsNoTracking());
         }
+
 
         //public async Task<int> GetFollowersCountAsync(string userId, CancellationToken cancellation = default)
         //{

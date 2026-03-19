@@ -1,4 +1,6 @@
-﻿namespace Mala3ib.BLL.Service.Implementation
+﻿using Mala3ib.DAL.Abstraction.Const;
+
+namespace Mala3ib.BLL.Service.Implementation
 {
     public class AuthService : IAuthService
     {
@@ -37,7 +39,9 @@
             if (!isValidPassword)
                 return Result.Failure<AuthResponseDto>(UserErrors.InvalidCredentials);
 
-            var (token, expiresIn) = _jwtProvider.GenerateToken(user);
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var (token, expiresIn) = _jwtProvider.GenerateToken(user, userRoles);
 
             var refreshToken = GenerateRefreshToken();
             var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
@@ -66,7 +70,9 @@
 
             userRefreshToken.RevokedOn = DateTime.UtcNow;
 
-            var (newToken, expiresIn) = _jwtProvider.GenerateToken(user);
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var (newToken, expiresIn) = _jwtProvider.GenerateToken(user, userRoles);
 
             var newRefreshToken = GenerateRefreshToken();
             var refreshTokenExpiration = DateTime.UtcNow.AddDays(_refreshTokenExpiryDays);
@@ -131,6 +137,8 @@
                 };
 
                 await _playerRepo.AddAsync(player);
+
+                await _userManager.AddToRoleAsync(user, DefaultRoles.Player);
 
                 BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendEmailVerificationOtpAsync(user));
 
