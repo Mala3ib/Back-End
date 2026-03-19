@@ -6,6 +6,6 @@ namespace Mala3ib.DAL.Errors
     {
         public static Error NotFound
             = new Error("Player.NotFound", "Player not found", ErrorType.NotFound);
-
+              
     }
 }

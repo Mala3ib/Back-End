@@ -21,5 +21,9 @@ namespace Mala3ib.DAL.Errors
 
         public static readonly Error DuplicatedConfirmation
                 = new Error("User.DuplicatedConfirmation", "Email is already confirmed", ErrorType.BadRequest);
+
+        public static readonly Error NotFouond
+                = new Error("User.NotFound", "User is not found", ErrorType.BadRequest);
+
     }
 }

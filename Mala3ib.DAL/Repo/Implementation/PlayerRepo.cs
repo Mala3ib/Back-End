@@ -1,9 +1,4 @@
-﻿
-using Azure.Core;
-using Mala3ib.DAL.Database;
-using Mala3ib.DAL.Errors;
-
-namespace Mala3ib.DAL.Repo.Implementation
+﻿namespace Mala3ib.DAL.Repo.Implementation
 {
     public class PlayerRepo : IPlayerRepo
     {
@@ -47,7 +42,7 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.Users
                 .Where(u => u.Id == userId)
                 .ExecuteUpdateAsync(setter =>
-                    setter.SetProperty(x => x.FirstName, request.User.FirstName)
+                     setter.SetProperty(x => x.FirstName, request.User.FirstName)
                     .SetProperty(x => x.LastName, request.User.LastName)
                     .SetProperty(x => x.PhoneNumber, request.User.PhoneNumber)
                 );
@@ -58,9 +53,10 @@ namespace Mala3ib.DAL.Repo.Implementation
 
         public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
         {
-            var isExist = await _context.Players.AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
-
-            if (!isExist)
+            var isExist = await _context.Players
+                .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
+            
+            if(!isExist)
                 return Result.Failure(PlayerErrors.NotFound);
 
             var player = _context.Players
@@ -73,7 +69,5 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.SaveChangesAsync(cancellation);
             return Result.Success();
         }
-
-
     }
 }

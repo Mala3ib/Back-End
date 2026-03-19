@@ -14,4 +14,10 @@ global using Microsoft.AspNetCore.Identity;
 global using Microsoft.IdentityModel.Tokens;
 global using System.Text;
 global using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
+global using Hangfire;
+global using Mala3ib.BLL.Helpers;
+global using Mala3ib.BLL.Settings;
+global using Mala3ib.DAL.Repo.Abstraction;
+global using Mala3ib.DAL.Repo.Implementation;
+global using Microsoft.AspNetCore.Identity.UI.Services;
 

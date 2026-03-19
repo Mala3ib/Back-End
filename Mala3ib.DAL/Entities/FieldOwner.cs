@@ -1,5 +1,3 @@
-using Mala3ib.DAL.Enums;
-
 namespace Mala3ib.DAL.Entities
 {
     public class FieldOwner

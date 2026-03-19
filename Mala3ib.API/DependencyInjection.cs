@@ -1,14 +1,4 @@
-﻿using Hangfire;
-using Mala3ib.BLL.Helpers;
-using Mala3ib.BLL.Settings;
-using Mala3ib.DAL.Repo.Abstraction;
-using Mala3ib.DAL.Repo.Implementation;
-using Mapster;
-using MapsterMapper;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using System.Reflection;
-
-namespace Mala3ib.API
+﻿namespace Mala3ib.API
 {
     public static class DependencyInjection
     {
@@ -16,7 +6,8 @@ namespace Mala3ib.API
         {
             services.AddAuthConfig(configuration)
                     .AddValidationConfig()
-                    .AddBackGroundJobsConfig(configuration);
+                    .AddBackGroundJobsConfig(configuration)
+                    .AddMappingConfig();
 
             services.AddControllers();
             services.AddOpenApi();
@@ -35,10 +26,12 @@ namespace Mala3ib.API
             services.AddScoped<IPlayerRepo, PlayerRepo>();
             services.AddScoped<IFieldRepo, FieldRepo>();
             services.AddScoped<IFieldOwnerRepo, FieldOwnerRepo>();
+            services.AddScoped<IFollowRepo, FollowRepo>();
             #endregion
 
             #region Service
             services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IFollowService, FollowService>();
             services.AddScoped<IFieldService, FieldService>();
             services.AddScoped<IFieldOwnerService, FieldOwnerService>();
             #endregion
