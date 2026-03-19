@@ -1,6 +1,3 @@
-using Mala3ib.DAL.Database;
-using Mala3ib.DAL.Errors;
-
 namespace Mala3ib.DAL.Repo.Implementation
 {
     public class FieldRepo : IFieldRepo

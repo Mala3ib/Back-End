@@ -1,6 +1,4 @@
-﻿using Mala3ib.DAL.Enums;
-
-namespace Mala3ib.DAL.Errors
+﻿namespace Mala3ib.DAL.Errors
 {
     public static class FieldOwnerErrors
     {

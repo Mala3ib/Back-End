@@ -1,4 +1,6 @@
-﻿namespace Mala3ib.API
+﻿using Mala3ib.DAL.Entities;
+
+namespace Mala3ib.API
 {
     public static class DependencyInjection
     {
@@ -46,7 +48,7 @@
         public static IServiceCollection AddAuthConfig(this IServiceCollection services, IConfiguration configuration)
         {
             services
-                .AddIdentity<ApplicationUser, IdentityRole>()
+                .AddIdentity<ApplicationUser, ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

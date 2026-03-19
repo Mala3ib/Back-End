@@ -20,4 +20,9 @@ global using Mala3ib.BLL.Settings;
 global using Mala3ib.DAL.Repo.Abstraction;
 global using Mala3ib.DAL.Repo.Implementation;
 global using Microsoft.AspNetCore.Identity.UI.Services;
-
+global using Mala3ib.BLL.Contracts.Authentication;
+global using Mala3ib.BLL.Contracts.Player;
+global using System.Security.Claims;
+global using Mala3ib.BLL.Contracts.FieldOwner;
+global using Mala3ib.BLL.Contracts.Field;
+global using Mala3ib.BLL.Contracts.Follow;

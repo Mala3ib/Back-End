@@ -1,9 +1,4 @@
-﻿using Mala3ib.BLL.Contracts.Authentication;
-using Mala3ib.BLL.Contracts.FieldOwner;
-using Mala3ib.BLL.Contracts.Player;
-using Microsoft.AspNetCore.Identity.Data;
-
-namespace Mala3ib.API.Controllers
+﻿namespace Mala3ib.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]

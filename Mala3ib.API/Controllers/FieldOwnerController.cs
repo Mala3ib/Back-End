@@ -1,7 +1,3 @@
-using System.Security.Claims;
-using Mala3ib.BLL.Contracts.Authentication;
-using Mala3ib.BLL.Contracts.FieldOwner;
-
 namespace Mala3ib.API.Controllers
 {
     [ApiController]
