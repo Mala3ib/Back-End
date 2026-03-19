@@ -115,7 +115,9 @@
                 UserName = request.Email,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                PhoneNumber = request.PhoneNumber
+                PhoneNumber = request.PhoneNumber,
+                // set image 
+                Image = request.Image
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -125,7 +127,6 @@
                 var player = new Player
                 {
                     UserId = user.Id,
-                    Image = request.Image,
                     DateOfBirth = request.DateOfBirth
                 };
 

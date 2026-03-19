@@ -5,6 +5,9 @@
         string FirstName,
         string LastName,
         string PhoneNumber, 
-        DateOnly DateOfBirth
+        DateOnly DateOfBirth,
+        int FollowersCount,
+        int FollowingCount,
+        bool IsFollowing
     );
 }

@@ -16,11 +16,11 @@ namespace Mala3ib.API.Controllers
             _playerService = playerService;
         }
 
-        [HttpGet("")]
-        public async Task<IActionResult> Get()
+        [HttpGet("{userId}")]
+        public async Task<IActionResult> Get([FromRoute] string userId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);           
-            var result = await _playerService.GetAsync(userId!);
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);           
+            var result = await _playerService.GetAsync(currentUserId!, userId);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }

@@ -1,7 +1,4 @@
-﻿
-using Mala3ib.DAL.Database;
-
-namespace Mala3ib.DAL.Repo.Implementation
+﻿namespace Mala3ib.DAL.Repo.Implementation
 {
     public class FieldOwnerRepo : IFieldOwnerRepo
     {

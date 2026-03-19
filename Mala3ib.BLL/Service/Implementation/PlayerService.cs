@@ -4,14 +4,18 @@ namespace Mala3ib.BLL.Service.Implementation
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepo _playerRepo;
+        private readonly IFollowRepo _followRepo;
         private readonly UserManager<ApplicationUser> _userManager;
-        public PlayerService(IPlayerRepo playerRepo, UserManager<ApplicationUser> userManager)
+        public PlayerService(IPlayerRepo playerRepo,
+            UserManager<ApplicationUser> userManager,
+            IFollowRepo followRepo)
         {
             _playerRepo = playerRepo;
             _userManager = userManager;
+            _followRepo = followRepo;
         }
 
-        public async Task<Result<PlayerProfileDto>> GetAsync(string userId, CancellationToken cancellation = default)
+        public async Task<Result<PlayerProfileDto>> GetAsync(string currentUserId, string userId, CancellationToken cancellation = default)
         {
             var player = await _playerRepo.Get(userId)
                 .Select(p => new PlayerProfileDto (
@@ -19,7 +23,10 @@ namespace Mala3ib.BLL.Service.Implementation
                     p.User.FirstName,
                     p.User.LastName,
                     p.User.PhoneNumber!,
-                    p.DateOfBirth
+                    p.DateOfBirth,
+                    p.User.Followers.Count(x => !x.IsDeleted),
+                    p.User.Following.Count(x => !x.IsDeleted),
+                    currentUserId == userId ? false : p.User.Followers.Any(x => x.FollowerId == currentUserId && !x.IsDeleted)
                 ))
                 .FirstOrDefaultAsync(cancellation);
 
@@ -65,6 +72,5 @@ namespace Mala3ib.BLL.Service.Implementation
             return await _playerRepo.DeleteAsync(userId, cancellation);
         }
 
-       
     }
 }

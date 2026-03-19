@@ -6,6 +6,7 @@ namespace Mala3ib.DAL.Database
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         public DbSet<Admin> Admins { get; set; }
         public DbSet<Player> Players { get; set; }
+        public DbSet<Follow> Follows { get; set; }
         public DbSet<FieldOwner> FieldOwners { get; set; }
         public DbSet<Field> Fields { get; set; }
         public DbSet<FieldImage> FieldImages { get; set; }
@@ -36,6 +37,19 @@ namespace Mala3ib.DAL.Database
                  .WithOne()
                  .HasForeignKey<FieldOwner>(f => f.UserId)
                  .OnDelete(DeleteBehavior.Restrict);
+
+            // Follow
+            modelBuilder.Entity<Follow>()
+            .HasOne(x => x.Follower)
+            .WithMany(x => x.Following)
+            .HasForeignKey(x => x.FollowerId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Follow>()
+                .HasOne(x => x.Following)
+                .WithMany(x => x.Followers)
+                .HasForeignKey(x => x.FollowingId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Fields & FieldOwner
             modelBuilder.Entity<Field>()
