@@ -65,5 +65,15 @@ namespace Mala3ib.BLL.Service.Implementation
 
             return await _fieldOwnerRepo.UpdateAsync(userId, fieldOwner, cancellation);
         }
+        public async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation = default)
+        {
+            var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)
+                .FirstOrDefaultAsync(cancellation);
+
+            if (owner == null)
+                return Result.Failure<int>(FieldOwnerErrors.NotFound);
+
+            return Result.Success(owner.Id);
+        }
     }
 }

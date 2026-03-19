@@ -33,11 +33,13 @@ namespace Mala3ib.API
 
             #region Repo
             services.AddScoped<IPlayerRepo, PlayerRepo>();
+            services.AddScoped<IFieldRepo, FieldRepo>();
             services.AddScoped<IFieldOwnerRepo, FieldOwnerRepo>();
             #endregion
 
             #region Service
             services.AddScoped<IPlayerService, PlayerService>();
+            services.AddScoped<IFieldService, FieldService>();
             services.AddScoped<IFieldOwnerService, FieldOwnerService>();
             #endregion
 
