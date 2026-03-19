@@ -24,6 +24,7 @@
 
             #region Repo
             services.AddScoped<IPlayerRepo, PlayerRepo>();
+            services.AddScoped<IFieldRepo, FieldRepo>();
             services.AddScoped<IFieldOwnerRepo, FieldOwnerRepo>();
             services.AddScoped<IFollowRepo, FollowRepo>();
             #endregion
@@ -31,6 +32,8 @@
             #region Service
             services.AddScoped<IPlayerService, PlayerService>();
             services.AddScoped<IFollowService, FollowService>();
+            services.AddScoped<IFieldService, FieldService>();
+            services.AddScoped<IFieldOwnerService, FieldOwnerService>();
             #endregion
 
             services.AddHttpContextAccessor();

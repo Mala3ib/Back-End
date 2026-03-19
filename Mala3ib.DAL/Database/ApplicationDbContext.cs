@@ -16,7 +16,7 @@ namespace Mala3ib.DAL.Database
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-            
+
             base.OnModelCreating(modelBuilder);
 
             // Application User with Admin & FieldOwner & Player

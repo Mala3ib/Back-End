@@ -14,9 +14,9 @@
             await _context.Players.AddAsync(player);
 
             await _context.SaveChangesAsync();
-        }      
+        }
 
-        public  IQueryable<Player> Get(string userId)
+        public IQueryable<Player> Get(string userId)
         {
             var player = _context.Players
                 .Where(x => x.UserId == userId)

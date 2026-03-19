@@ -1,4 +1,8 @@
-﻿namespace Mala3ib.DAL.Repo.Implementation
+﻿
+using Mala3ib.DAL.Database;
+using Mala3ib.DAL.Errors;
+
+namespace Mala3ib.DAL.Repo.Implementation
 {
     public class FieldOwnerRepo : IFieldOwnerRepo
     {
@@ -12,7 +16,66 @@
         public async Task AddAsync(FieldOwner fieldOwner)
         {
             await _context.FieldOwners.AddAsync(fieldOwner);
+
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
+        {
+            var isExist = await _context.FieldOwners.AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
+
+            if (!isExist)
+                return Result.Failure(FieldOwnerErrors.NotFound);
+
+            var fieldOwner = _context.FieldOwners
+                .Include(x => x.User)
+                .FirstOrDefault(x => x.UserId == userId);
+
+            fieldOwner!.IsDeleted = true;
+            fieldOwner!.User.IsDeleted = true;
+
+            await _context.SaveChangesAsync(cancellation);
+            return Result.Success();
+        }
+
+        public IQueryable<FieldOwner> Get(string userId)
+        {
+            var fieldOwner = _context.FieldOwners
+                            .Where(x => x.UserId == userId)
+                            .AsNoTracking();
+
+            return fieldOwner;
+        }
+
+        public async Task<Result> UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default)
+        {
+            var isExist = await _context.FieldOwners
+                .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
+
+            if (!isExist)
+                return Result.Failure(FieldOwnerErrors.NotFound);
+
+            await _context.FieldOwners
+                .Where(p => p.UserId == userId)
+                .ExecuteUpdateAsync(setter =>
+                    setter.SetProperty(x => x.DateOfBirth, request.DateOfBirth)
+                    .SetProperty(x => x.IsApproved, request.IsApproved)
+                );
+
+            await _context.Users
+                .Where(u => u.Id == userId)
+                .ExecuteUpdateAsync(setter =>
+                    setter.SetProperty(x => x.FirstName, request.User.FirstName)
+                    .SetProperty(x => x.LastName, request.User.LastName)
+                    .SetProperty(x => x.PhoneNumber, request.User.PhoneNumber)
+                );
+
+            await _context.SaveChangesAsync(cancellation);
+            return Result.Success();
+        }
+        public IQueryable<FieldOwner> GetOwnerByUserId(string userId)
+        {
+            return _context.FieldOwners.Where(o => o.UserId == userId);
         }
     }
 }

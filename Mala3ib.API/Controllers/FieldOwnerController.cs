@@ -1,52 +1,48 @@
-﻿using Mala3ib.BLL.Contracts.Authentication;
-using Mala3ib.BLL.Contracts.Player;
 using System.Security.Claims;
+using Mala3ib.BLL.Contracts.Authentication;
+using Mala3ib.BLL.Contracts.FieldOwner;
 
 namespace Mala3ib.API.Controllers
 {
-    [Route("[controller]")]
     [ApiController]
+    [Route("[controller]")]
     [Authorize]
-    public class AccountController : ControllerBase
+    public class FieldOwnerController : ControllerBase
     {
-        private readonly IPlayerService _playerService;
-        public AccountController(IPlayerService playerService)
+        private readonly IFieldOwnerService _fieldOwnerService;
+        public FieldOwnerController(IFieldOwnerService fieldOwnerService)
         {
-            _playerService = playerService;
+            _fieldOwnerService = fieldOwnerService;
         }
-
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> Get([FromRoute] string userId)
+        [HttpGet("")]
+        public async Task<IActionResult> Get()
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);           
-            var result = await _playerService.GetAsync(currentUserId!, userId);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _fieldOwnerService.GetAsync(userId!);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
-
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
         {
             var uesrId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _playerService.ChangePasswordAsync(uesrId!, request);
+            var result = await _fieldOwnerService.ChangePasswordAsync(uesrId!, request);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
-
         [HttpDelete("")]
         public async Task<IActionResult> Delete(CancellationToken cancellation)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _playerService.DeleteAsync(userId!);
+            var result = await _fieldOwnerService.DeleteAsync(userId!);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
-
         [HttpPut("")]
-        public async Task<IActionResult> Update(UpdatePlayerRequestDto request, CancellationToken cancellation)
+        public async Task<IActionResult> Update(UpdateFieldOwnerRequestDto request, CancellationToken cancellation)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _playerService.UpdateAsync(userId!, request, cancellation);
+            var result = await _fieldOwnerService.UpdateAsync(userId!, request, cancellation);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
