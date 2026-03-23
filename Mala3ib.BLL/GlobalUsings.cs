@@ -23,3 +23,5 @@ global using Mala3ib.DAL.Enums;
 global using Hangfire;
 global using Mala3ib.DAL.Errors;
 global using Mala3ib.DAL.Repo.Abstraction;
+global using Mala3ib.BLL.Contracts.FieldReview;
+global using Mapster;
