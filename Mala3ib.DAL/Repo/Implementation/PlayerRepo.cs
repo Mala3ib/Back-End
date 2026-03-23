@@ -69,5 +69,13 @@
             await _context.SaveChangesAsync(cancellation);
             return Result.Success();
         }
+
+        public async Task<int?> GetPlayerIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+        {
+            return await _context.Players
+                .Where(p => p.UserId == userId && !p.IsDeleted)
+                .Select(p => p.Id)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
     }
 }
