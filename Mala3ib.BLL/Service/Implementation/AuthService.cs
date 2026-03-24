@@ -180,6 +180,8 @@ namespace Mala3ib.BLL.Service.Implementation
 
                 await _fieldOwnerRepo.AddAsync(fieldOwner);
 
+                await _userManager.AddToRoleAsync(user, DefaultRoles.FieldOwner);
+
                 BackgroundJob.Enqueue<IEmailVerificationService>(x => x.SendEmailVerificationOtpAsync(user));
 
                 return Result.Success(new RegisterReponseDto(user.Id));
@@ -240,7 +242,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
             var isValidOtp = await _emailVerificationService.VerifyForgetPasswordOtpAsync(user, otp);
 
-            if(isValidOtp.IsFailure)
+            if (isValidOtp.IsFailure)
                 return Result.Failure(new Error("Invalid.Otp", "The verification code is incorrect.", ErrorType.Unauthorized));
 
             return Result.Success();

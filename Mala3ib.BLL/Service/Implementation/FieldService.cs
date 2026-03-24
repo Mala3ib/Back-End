@@ -5,27 +5,29 @@ namespace Mala3ib.BLL.Service.Implementation
     public class FieldService : IFieldService
     {
         private readonly IFieldRepo _fieldRepo;
-
-        public FieldService(IFieldRepo fieldRepo)
+        private readonly IFieldOwnerRepo _fieldOwnerRepo;
+        public FieldService(IFieldRepo fieldRepo, IFieldOwnerRepo fieldOwnerRepo)
         {
             _fieldRepo = fieldRepo;
+            _fieldOwnerRepo = fieldOwnerRepo;
         }
 
-        public async Task<Result<int>> AddAsync(AddFieldRequestDto request, int ownerId, CancellationToken cancellation = default)
+        public async Task<Result<int>> AddAsync(AddFieldRequestDto request, string userId, CancellationToken cancellation = default)
         {
+            var ownerId = await GetOwnerIdByUserIdAsync(userId);
             var field = new Field
             {
                 Name = request.Name,
                 Location = request.Location,
                 PricePerHour = request.PricePerHour,
-                FieldOwnerId = ownerId
+                FieldOwnerId = ownerId.Value
             };
             await _fieldRepo.AddAsync(field);
 
             return Result.Success(field.Id);
         }
 
-        public async Task<Result> DeleteAsync(int id, int ownerId, CancellationToken cancellation = default)
+        public async Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default)
         {
             var field = await _fieldRepo.GetById(id)
                 .FirstOrDefaultAsync(cancellation);
@@ -33,7 +35,9 @@ namespace Mala3ib.BLL.Service.Implementation
             if (field is null)
                 return Result.Failure(FieldErrors.NotFound);
 
-            if (field.FieldOwnerId != ownerId)
+            var ownerId = await GetOwnerIdByUserIdAsync(userId);
+
+            if (field.FieldOwnerId != ownerId.Value)
                 return Result.Failure(FieldErrors.Unauthorized);
 
             await _fieldRepo.DeleteAsync(id, cancellation);
@@ -83,7 +87,18 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success<IEnumerable<FieldResponseDto>>(fields);
         }
 
-        public async Task<Result> UpdateAsync(int id, UpdateFieldRequestDto request, int ownerId, CancellationToken cancellation = default)
+        public async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation = default)
+        {
+            var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)
+                .FirstOrDefaultAsync(cancellation);
+
+            if (owner == null)
+                return Result.Failure<int>(FieldOwnerErrors.NotFound);
+
+            return Result.Success(owner.Id);
+        }
+
+        public async Task<Result> UpdateAsync(int id, UpdateFieldRequestDto request, string userId, CancellationToken cancellation = default)
         {
             var oldField = await _fieldRepo.GetById(id)
                 .FirstOrDefaultAsync(cancellation);
@@ -91,7 +106,9 @@ namespace Mala3ib.BLL.Service.Implementation
             if (oldField is null)
                 return Result.Failure(FieldErrors.NotFound);
 
-            if (oldField.FieldOwnerId != ownerId)
+            var ownerId = await GetOwnerIdByUserIdAsync(userId);
+
+            if (oldField.FieldOwnerId != ownerId.Value)
                 return Result.Failure(FieldErrors.Unauthorized);
 
             var field = new Field
