@@ -4,26 +4,39 @@ namespace Mala3ib.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    [Authorize]
     public class AccountController : ControllerBase
     {
         private readonly IPlayerService _playerService;
-        public AccountController(IPlayerService playerService)
+        private readonly IFieldOwnerService _fieldOwnerService;
+        public AccountController(IPlayerService playerService, IFieldOwnerService fieldOwnerService)
         {
             _playerService = playerService;
+            _fieldOwnerService = fieldOwnerService;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> Get([FromRoute] string userId)
+        [Authorize]
+        [HttpGet("player/{userId}")]
+        public async Task<IActionResult> GetPlayer([FromRoute] string userId)
         {
-            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);           
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _playerService.GetAsync(currentUserId!, userId);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
 
-        [HttpPut("change-password")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto request)
+        [Authorize]
+        [HttpGet("field-owner")]
+        public async Task<IActionResult> GetOwner()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _fieldOwnerService.GetAsync(userId!);
+
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+
+        [Authorize(Roles = DefaultRoles.Player)]
+        [HttpPut("player/change-password")]
+        public async Task<IActionResult> ChangePlayerPassword([FromBody] ChangePasswordRequestDto request)
         {
             var uesrId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _playerService.ChangePasswordAsync(uesrId!, request);
@@ -31,8 +44,19 @@ namespace Mala3ib.API.Controllers
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
 
-        [HttpDelete("")]
-        public async Task<IActionResult> Delete(CancellationToken cancellation)
+        [Authorize(Roles = DefaultRoles.FieldOwner)]
+        [HttpPut("field-owner/change-password")]
+        public async Task<IActionResult> ChangeOwnerPassword([FromBody] ChangePasswordRequestDto request)
+        {
+            var uesrId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _fieldOwnerService.ChangePasswordAsync(uesrId!, request);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+
+        [Authorize(Roles = DefaultRoles.Player)]
+        [HttpDelete("player")]
+        public async Task<IActionResult> DeletePlayer(CancellationToken cancellation)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _playerService.DeleteAsync(userId!);
@@ -40,11 +64,32 @@ namespace Mala3ib.API.Controllers
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
 
-        [HttpPut("")]
-        public async Task<IActionResult> Update(UpdatePlayerRequestDto request, CancellationToken cancellation)
+        [Authorize(Roles = DefaultRoles.FieldOwner)]
+        [HttpDelete("field-owner")]
+        public async Task<IActionResult> DeleteOwner(CancellationToken cancellation)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _fieldOwnerService.DeleteAsync(userId!);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+
+        [Authorize(Roles = DefaultRoles.Player)]
+        [HttpPut("player")]
+        public async Task<IActionResult> UpdatePlayer(UpdatePlayerRequestDto request, CancellationToken cancellation)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _playerService.UpdateAsync(userId!, request, cancellation);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+
+        [Authorize(Roles = DefaultRoles.FieldOwner)]
+        [HttpPut("field-owner")]
+        public async Task<IActionResult> UpdateOwner(UpdateFieldOwnerRequestDto request, CancellationToken cancellation)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _fieldOwnerService.UpdateAsync(userId!, request, cancellation);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
