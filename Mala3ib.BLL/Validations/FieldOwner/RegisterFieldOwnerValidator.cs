@@ -23,7 +23,7 @@
 
             RuleFor(x => x.DateOfBirth)
                 .NotEmpty()
-                 .LessThan(DateOnly.FromDateTime(DateTime.UtcNow))
+                .LessThan(DateOnly.FromDateTime(DateTime.UtcNow))
                 .WithMessage("Date of birth must be earlier than today.");
         }
     }
