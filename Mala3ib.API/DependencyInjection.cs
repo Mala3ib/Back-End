@@ -30,6 +30,7 @@ namespace Mala3ib.API
             services.AddScoped<IFieldOwnerRepo, FieldOwnerRepo>();
             services.AddScoped<IFieldSlotRepo, FieldSlotRepo>();
             services.AddScoped<IFollowRepo, FollowRepo>();
+            services.AddScoped<IFieldReviewRepo, FieldReviewRepo>();
             #endregion
 
             #region Service
@@ -38,6 +39,7 @@ namespace Mala3ib.API
             services.AddScoped<IFieldService, FieldService>();
             services.AddScoped<IFieldOwnerService, FieldOwnerService>();
             services.AddScoped<IFieldSlotService, FieldSlotService>();
+            services.AddScoped<IFieldReviewService, FieldReviewService>();
             #endregion
 
             services.AddHttpContextAccessor();

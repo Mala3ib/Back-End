@@ -26,3 +26,5 @@ global using System.Security.Claims;
 global using Mala3ib.BLL.Contracts.FieldOwner;
 global using Mala3ib.BLL.Contracts.Field;
 global using Mala3ib.BLL.Contracts.Follow;
+global using Mala3ib.DAL.Abstraction.Const;
+global using Mala3ib.BLL.Contracts.FieldReview;
