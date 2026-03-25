@@ -14,6 +14,14 @@ namespace Mala3ib.API
             services.AddControllers();
             services.AddOpenApi();
 
+            services.AddCors(options =>
+                options.AddPolicy("AllowAll", builder =>
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader()
+                )
+            );
+
             var connectionString = configuration.GetConnectionString("defaultConnection");
             services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(connectionString));

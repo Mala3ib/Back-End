@@ -1,8 +1,4 @@
-﻿
-
-using Mala3ib.BLL.Contracts.Common;
-
-namespace Mala3ib.API.Controllers
+﻿namespace Mala3ib.API.Controllers
 {
     [Route("[controller]")]
     [ApiController]
