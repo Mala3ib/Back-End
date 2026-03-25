@@ -28,3 +28,5 @@ global using Mala3ib.BLL.Contracts.Field;
 global using Mala3ib.BLL.Contracts.Follow;
 global using Mala3ib.DAL.Abstraction.Const;
 global using Mala3ib.BLL.Contracts.FieldReview;
+global using Mala3ib.BLL.Contracts.FieldSlot;
+global using Mala3ib.BLL.Contracts.Common;

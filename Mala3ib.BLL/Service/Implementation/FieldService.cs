@@ -12,7 +12,7 @@ namespace Mala3ib.BLL.Service.Implementation
             _fieldOwnerRepo = fieldOwnerRepo;
         }
 
-        public async Task<Result<int>> AddAsync(AddFieldRequestDto request, string userId, CancellationToken cancellation = default)
+        public async Task<Result<FieldResponseDto>> AddAsync(AddFieldRequestDto request, string userId, CancellationToken cancellation = default)
         {
             var ownerId = await GetOwnerIdByUserIdAsync(userId);
             var field = new Field
@@ -22,9 +22,12 @@ namespace Mala3ib.BLL.Service.Implementation
                 PricePerHour = request.PricePerHour,
                 FieldOwnerId = ownerId.Value
             };
+
             await _fieldRepo.AddAsync(field);
 
-            return Result.Success(field.Id);
+            var fieldResponse = field.Adapt<FieldResponseDto>();
+
+            return Result.Success(fieldResponse!);
         }
 
         public async Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default)

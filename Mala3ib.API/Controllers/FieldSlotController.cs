@@ -1,6 +1,3 @@
-using Mala3ib.BLL.Contracts.FieldSlot;
-using Mala3ib.DAL.Abstraction.Const;
-
 namespace Mala3ib.API.Controllers
 {
     [ApiController]
@@ -25,7 +22,7 @@ namespace Mala3ib.API.Controllers
         }
 
         [Authorize(Roles = DefaultRoles.FieldOwner)]
-        [HttpPut("{fieldId}/{id}")]
+        [HttpPut("{fieldId}/slot/{id}")]
         public async Task<IActionResult> Update([FromRoute] int fieldId, [FromRoute] int id, UpdateFieldSlotRequestDto request, CancellationToken cancellation)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -36,7 +33,7 @@ namespace Mala3ib.API.Controllers
         }
 
         [Authorize(Roles = DefaultRoles.FieldOwner)]
-        [HttpDelete("{fieldId}/{id}")]
+        [HttpDelete("{fieldId}/slot/{id}")]
         public async Task<IActionResult> Delete([FromRoute] int fieldId, [FromRoute] int id, CancellationToken cancellation)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

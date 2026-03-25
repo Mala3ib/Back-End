@@ -31,6 +31,7 @@ public class Program
         app.UseHangfireDashboard("/Jobs");
 
         app.UseHttpsRedirection();
+        app.UseCors("AllowAll");
 
         app.UseAuthorization();
 

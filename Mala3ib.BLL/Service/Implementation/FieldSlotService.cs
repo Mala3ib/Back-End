@@ -21,10 +21,10 @@ namespace Mala3ib.BLL.Service.Implementation
                 .FirstOrDefaultAsync(cancellation);
 
             if (owner is null || field is null)
-                return Result.Failure<(FieldOwner, Field)>(FieldSlotErrors.NotFound);
+                return Result.Failure(FieldSlotErrors.NotFound);
 
             if (owner.Id != field.FieldOwnerId)
-                return Result.Failure<(FieldOwner, Field)>(FieldSlotErrors.Unauthorized);
+                return Result.Failure(FieldSlotErrors.Unauthorized);
 
             return Result.Success();
         }

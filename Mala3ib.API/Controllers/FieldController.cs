@@ -47,7 +47,7 @@ namespace Mala3ib.API.Controllers
 
             var result = await _fieldService.AddAsync(request, userId!, cancellation);
 
-            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+            return result.IsSuccess ? CreatedAtAction(nameof(GetById), new {result.Value.Id}, result.Value) : result.ToProblem();
         }
 
         [Authorize(Roles = DefaultRoles.FieldOwner)]
