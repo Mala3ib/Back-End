@@ -1,4 +1,4 @@
-using Mala3ib.BLL.Contracts.Field;
+using Mala3ib.BLL.Abstraction;
 
 namespace Mala3ib.BLL.Service.Implementation
 {
@@ -47,17 +47,62 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success();
         }
 
-        public async Task<Result<IEnumerable<FieldResponseDto>>> GetAllAsync(CancellationToken cancellation = default)
+        public async Task<Result<PaginatedList<FieldResponseDto>>> GetAllAsync(RequestFilter filter,  CancellationToken cancellation = default)
         {
-            var fields = await _fieldRepo.GetAll()
+            var query = _fieldRepo.GetAll();
+
+            if(!string.IsNullOrEmpty(filter.SearchValue))
+            {
+                query = query.Where(x => x.Location.Contains(filter.SearchValue));
+            }
+
+            var projected = query
+                .Select(f => new
+                {
+                    f.Id,
+                    f.Name,
+                    f.Location,
+                    f.PricePerHour,
+                    Rating = f.Reviews
+                        .Select(r => (float?)r.Rating)
+                        .Average() ?? 0
+                });
+
+            var sortColumnKey = string.IsNullOrWhiteSpace(filter.SortColumn)
+                ? FieldSortingConfig.DefaultColumn
+                : filter.SortColumn.ToUpper();
+
+            if (!FieldSortingConfig.ColumnMap.ContainsKey(sortColumnKey))
+            {
+                sortColumnKey = FieldSortingConfig.DefaultColumn;
+            }
+
+            var columnName = FieldSortingConfig.ColumnMap[sortColumnKey];
+
+            var direction = string.IsNullOrWhiteSpace(filter.SortDirection)
+                ? "ASC"
+                : filter.SortDirection.ToUpper();
+
+            if (direction != "ASC" && direction != "DESC")
+            {
+                direction = "ASC";
+
+                if (columnName == "Rating") direction = "DESC";
+            }
+
+            projected = projected.OrderBy($"{columnName} {direction}");
+
+            var source = projected
                 .Select(f => new FieldResponseDto(
                     f.Id,
                     f.Name,
                     f.Location,
-                    f.PricePerHour
-                )).ToListAsync(cancellation);
+                    f.PricePerHour,
+                    f.Rating
+                ));
+            var fields = await PaginatedList<FieldResponseDto>.CreateAsync(source, filter.PageNumber, filter.PageSize);
 
-            return Result.Success<IEnumerable<FieldResponseDto>>(fields);
+            return Result.Success(fields);
         }
 
         public async Task<Result<FieldResponseDto>> GetByIdAsync(int id, CancellationToken cancellation = default)
@@ -67,7 +112,8 @@ namespace Mala3ib.BLL.Service.Implementation
                     f.Id,
                     f.Name,
                     f.Location,
-                    f.PricePerHour
+                    f.PricePerHour,
+                    f.Reviews.Select(r => (float?)r.Rating).Average() ?? 0
                 )).FirstOrDefaultAsync(cancellation);
 
             if (field is null)
@@ -76,14 +122,20 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success(field);
         }
 
-        public async Task<Result<IEnumerable<FieldResponseDto>>> GetByOwnerIdAsync(int ownerId, CancellationToken cancellation = default)
+        public async Task<Result<IEnumerable<FieldResponseDto>>> GetByOwnerIdAsync(string ownerId, CancellationToken cancellation = default)
         {
-            var fields = await _fieldRepo.GetByOwnerId(ownerId)
+            var ownerIdResult = await GetOwnerIdByUserIdAsync(ownerId, cancellation);
+
+            if (ownerIdResult.IsFailure)
+                return Result.Failure<IEnumerable<FieldResponseDto>>(ownerIdResult.Error);
+
+            var fields = await _fieldRepo.GetByOwnerId(ownerIdResult.Value)
                 .Select(f => new FieldResponseDto(
                     f.Id,
                     f.Name,
                     f.Location,
-                    f.PricePerHour
+                    f.PricePerHour,
+                    f.Reviews.Select(r => (float?)r.Rating).Average() ?? 0
                 )).ToListAsync(cancellation);
 
 

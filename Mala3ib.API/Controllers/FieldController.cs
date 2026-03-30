@@ -14,9 +14,9 @@ namespace Mala3ib.API.Controllers
 
         [HttpGet("get-all")]
         [Authorize]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] RequestFilter filter, CancellationToken cancellationToken)
         {
-            var result = await _fieldService.GetAllAsync();
+            var result = await _fieldService.GetAllAsync(filter, cancellationToken);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
@@ -32,7 +32,7 @@ namespace Mala3ib.API.Controllers
 
         [Authorize]
         [HttpGet("get-by-owner-id/{ownerId}")]
-        public async Task<IActionResult> GetByOwnerId([FromRoute] int ownerId, CancellationToken cancellation)
+        public async Task<IActionResult> GetByOwnerId([FromRoute] string ownerId, CancellationToken cancellation)
         {
             var result = await _fieldService.GetByOwnerIdAsync(ownerId, cancellation);
 

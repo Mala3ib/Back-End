@@ -4,6 +4,7 @@ namespace Mala3ib.BLL.Contracts.Field
         int Id,
         string Name,
         string Location,
-        decimal PricePerHour
+        decimal PricePerHour,
+        float Rating
     );
 }
