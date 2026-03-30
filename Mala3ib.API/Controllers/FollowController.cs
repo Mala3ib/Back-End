@@ -47,21 +47,13 @@
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
-
-        //[HttpGet("{userId}/following-count")]
-        //public async Task<IActionResult> GetFollowingCout([FromRoute] string userId, CancellationToken cancellation)
-        //{
-        //    var result = await _followService.GetFollowingCountAsync(userId, cancellation);
-
-        //    return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-        //}
-
-        //[HttpGet("{userId}/followers-count")]
-        //public async Task<IActionResult> GetFollowersCout([FromRoute] string userId, CancellationToken cancellation)
-        //{
-        //    var result = await _followService.GetFollowersCountAsync(userId, cancellation);
-
-        //    return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-        //}
+        
+        [HttpPost("follow/{email}")]
+        public async Task<IActionResult> FollowUserByEmail([FromRoute] string email, CancellationToken cancellationToken)
+        {
+            // implementation 
+            await Task.CompletedTask;
+            return NoContent();
+        }
     }
 }
