@@ -8,6 +8,5 @@ namespace Mala3ib.BLL.Service.Abstraction
         Task<Result<IEnumerable<FieldResponseDto>>> GetByOwnerIdAsync(string ownerId, CancellationToken cancellation = default);
         Task<Result> UpdateAsync(int id, UpdateFieldRequestDto request, string userId, CancellationToken cancellation = default);
         Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default);
-        Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation = default);
     }
 }

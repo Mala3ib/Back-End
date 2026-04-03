@@ -18,11 +18,6 @@
 
         public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
         {
-            var isExist = await _context.FieldOwners.AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
-
-            if (!isExist)
-                return Result.Failure(FieldOwnerErrors.NotFound);
-
             var fieldOwner = _context.FieldOwners
                 .Include(x => x.User)
                 .FirstOrDefault(x => x.UserId == userId);
@@ -43,14 +38,14 @@
             return fieldOwner;
         }
 
+        public async Task<bool> FieleOwnerIsExist(string userId, CancellationToken cancellation = default)
+        {
+            return await _context.FieldOwners
+               .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
+        }
+
         public async Task<Result> UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default)
         {
-            var isExist = await _context.FieldOwners
-                .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
-
-            if (!isExist)
-                return Result.Failure(FieldOwnerErrors.NotFound);
-
             await _context.FieldOwners
                 .Where(p => p.UserId == userId)
                 .ExecuteUpdateAsync(setter =>
