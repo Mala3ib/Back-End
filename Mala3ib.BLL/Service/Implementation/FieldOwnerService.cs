@@ -27,6 +27,11 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
         {
+            var fieldOwnerIsExist = await _fieldOwnerRepo.FieleOwnerIsExist(userId, cancellation);
+
+            if (!fieldOwnerIsExist)
+                return Result.Failure(FieldOwnerErrors.NotFound);
+
             return await _fieldOwnerRepo.DeleteAsync(userId, cancellation);
         }
 
@@ -51,6 +56,11 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> UpdateAsync(string userId, UpdateFieldOwnerRequestDto request, CancellationToken cancellation = default)
         {
+            var fieldOwnerIsExist = await _fieldOwnerRepo.FieleOwnerIsExist(userId, cancellation);
+
+            if(!fieldOwnerIsExist)
+                return Result.Failure(FieldOwnerErrors.NotFound);
+
             var fieldOwner = new FieldOwner
             {
                 IsApproved = request.IsApproved,

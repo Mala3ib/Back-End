@@ -14,7 +14,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result<FieldResponseDto>> AddAsync(AddFieldRequestDto request, string userId, CancellationToken cancellation = default)
         {
-            var ownerId = await GetOwnerIdByUserIdAsync(userId);
+            var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
             var field = new Field
             {
                 Name = request.Name,
@@ -38,7 +38,7 @@ namespace Mala3ib.BLL.Service.Implementation
             if (field is null)
                 return Result.Failure(FieldErrors.NotFound);
 
-            var ownerId = await GetOwnerIdByUserIdAsync(userId);
+            var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
 
             if (field.FieldOwnerId != ownerId.Value)
                 return Result.Failure(FieldErrors.Unauthorized);
@@ -141,17 +141,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
             return Result.Success<IEnumerable<FieldResponseDto>>(fields);
         }
-
-        public async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation = default)
-        {
-            var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)
-                .FirstOrDefaultAsync(cancellation);
-
-            if (owner == null)
-                return Result.Failure<int>(FieldOwnerErrors.NotFound);
-
-            return Result.Success(owner.Id);
-        }
+      
 
         public async Task<Result> UpdateAsync(int id, UpdateFieldRequestDto request, string userId, CancellationToken cancellation = default)
         {
@@ -161,7 +151,7 @@ namespace Mala3ib.BLL.Service.Implementation
             if (oldField is null)
                 return Result.Failure(FieldErrors.NotFound);
 
-            var ownerId = await GetOwnerIdByUserIdAsync(userId);
+            var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
 
             if (oldField.FieldOwnerId != ownerId.Value)
                 return Result.Failure(FieldErrors.Unauthorized);
@@ -174,6 +164,17 @@ namespace Mala3ib.BLL.Service.Implementation
             };
 
             return await _fieldRepo.UpdateAsync(id, field, cancellation);
+        }
+
+        private async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation)
+        {
+            var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)
+                .FirstOrDefaultAsync(cancellation);
+
+            if (owner == null)
+                return Result.Failure<int>(FieldOwnerErrors.NotFound);
+
+            return Result.Success(owner.Id);
         }
     }
 }
