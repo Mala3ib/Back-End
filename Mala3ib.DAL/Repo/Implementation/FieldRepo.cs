@@ -16,22 +16,6 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Result> DeleteAsync(int id, CancellationToken cancellation = default)
-        {
-            var isExist = await _context.Fields.AnyAsync(p => p.Id == id && !p.IsDeleted, cancellation);
-
-            if (!isExist)
-                return Result.Failure(FieldErrors.NotFound);
-
-            var field = _context.Fields
-                .FirstOrDefault(x => x.Id == id);
-
-            field!.IsDeleted = true;
-
-            await _context.SaveChangesAsync(cancellation);
-            return Result.Success();
-        }
-
         public IQueryable<Field> GetAll()
         {
             var fields = _context.Fields.Where(f => !f.IsDeleted)
@@ -61,17 +45,11 @@ namespace Mala3ib.DAL.Repo.Implementation
         public async Task<bool> IsExistAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Fields
-                .AnyAsync(x => x.Id == id, cancellationToken);
+                .AnyAsync(x => x.Id == id  && !x.IsDeleted, cancellationToken);
         }
 
-        public async Task<Result> UpdateAsync(int id, Field request, CancellationToken cancellation = default)
+        public async Task UpdateAsync(int id, Field request, CancellationToken cancellation = default)
         {
-            var isExist = await _context.Fields
-                .AnyAsync(f => f.Id == id && !f.IsDeleted, cancellation);
-
-            if (!isExist)
-                return Result.Failure(FieldErrors.NotFound);
-
             await _context.Fields
                 .Where(f => f.Id == id)
                 .ExecuteUpdateAsync(setter =>
@@ -79,9 +57,15 @@ namespace Mala3ib.DAL.Repo.Implementation
                     .SetProperty(x => x.Location, request.Location)
                     .SetProperty(x => x.PricePerHour, request.PricePerHour)
                 );
+        }
 
-            await _context.SaveChangesAsync(cancellation);
-            return Result.Success();
+        public async Task DeleteAsync(int id, CancellationToken cancellation = default)
+        {
+            var affectedRows = await _context.Fields
+                .Where(x => x.Id == id && !x.IsDeleted)
+                .ExecuteUpdateAsync(setter =>
+                setter.SetProperty(x => x.IsDeleted, true)
+                );
         }
     }
 }

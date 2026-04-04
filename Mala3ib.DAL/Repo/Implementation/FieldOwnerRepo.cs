@@ -16,17 +16,19 @@
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
+        public async Task DeleteAsync(string userId, CancellationToken cancellation = default)
         {
-            var fieldOwner = _context.FieldOwners
-                .Include(x => x.User)
-                .FirstOrDefault(x => x.UserId == userId);
+            await _context.FieldOwners
+                .Where(x => x.UserId == userId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(p => p.IsDeleted, true)
+                );
 
-            fieldOwner!.IsDeleted = true;
-            fieldOwner!.User.IsDeleted = true;
-
-            await _context.SaveChangesAsync(cancellation);
-            return Result.Success();
+            await _context.Users
+                .Where(x => x.Id == userId)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.IsDeleted, true)
+                );
         }
 
         public IQueryable<FieldOwner> Get(string userId)
@@ -44,7 +46,7 @@
                .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
         }
 
-        public async Task<Result> UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default)
+        public async Task UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default)
         {
             await _context.FieldOwners
                 .Where(p => p.UserId == userId)
@@ -60,9 +62,6 @@
                     .SetProperty(x => x.LastName, request.User.LastName)
                     .SetProperty(x => x.PhoneNumber, request.User.PhoneNumber)
                 );
-
-            await _context.SaveChangesAsync(cancellation);
-            return Result.Success();
         }
         public IQueryable<FieldOwner> GetOwnerByUserId(string userId)
         {

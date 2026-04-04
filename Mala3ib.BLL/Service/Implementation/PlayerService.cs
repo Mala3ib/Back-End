@@ -38,6 +38,11 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> UpdateAsync(string userId, UpdatePlayerRequestDto request, CancellationToken cancellation = default)
         {
+            var isExist = await _playerRepo.IsExistAsync(userId, cancellation);
+
+            if (!isExist)
+                return Result.Failure(PlayerErrors.NotFound);
+
             var player = new Player
             {
                 DateOfBirth = request.DateOfBirth,
@@ -49,7 +54,8 @@ namespace Mala3ib.BLL.Service.Implementation
                 }
             };
 
-            return await _playerRepo.UpdateAsync(userId, player, cancellation);
+            await _playerRepo.UpdateAsync(userId, player, cancellation);
+            return Result.Success(player);
         }
 
         public async Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequestDto request)
@@ -69,7 +75,14 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
         {
-            return await _playerRepo.DeleteAsync(userId, cancellation);
+            var isExist = await _playerRepo.IsExistAsync(userId, cancellation);
+
+            if (!isExist)
+                return Result.Failure(PlayerErrors.NotFound);
+
+            await _playerRepo.DeleteAsync(userId, cancellation);
+
+            return Result.Success();
         }
 
     }

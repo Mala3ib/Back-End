@@ -3,7 +3,8 @@
     public interface IFieldReviewRepo
     {
         Task AddAsync(FieldReview fieldReview, CancellationToken cancellationToken);
-        Task<bool> ExistsAsync(int fieldId, int playerId, CancellationToken cancellationToken = default);
+        Task<bool> IsExistsAsync(int fieldId, int playerId, CancellationToken cancellationToken = default);
+        Task<bool> HasDeletedReview(int fieldId, int playerId, CancellationToken cancellationToken = default);
         Task<FieldReview?> GetByIdAsync(int reviewId, CancellationToken cancellationToken = default);
         Task UpdateAsync(FieldReview fieldReview, CancellationToken cancelToken);
         Task DeleteAsync(int reviewId, CancellationToken cancellationToken = default);

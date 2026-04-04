@@ -6,36 +6,57 @@ namespace Mala3ib.BLL.Service.Implementation
     public class FollowService : IFollowService
     {
         private readonly IFollowRepo _followRepo;
-
-        public FollowService(IFollowRepo followRepo)
+        private readonly IUserRepo _userRepo;
+        public FollowService(IFollowRepo followRepo, IUserRepo userRepo)
         {
             _followRepo = followRepo;
+            _userRepo = userRepo;
         }
 
         public async Task<Result> FollowAsync(string currentUserId, FollowRequestDto request, CancellationToken cancellation = default)
         {
+            var targetUserIsExist = await _userRepo.IsExistAsync(request.TargetUserId, cancellation);
+            if (!targetUserIsExist)
+                return Result.Failure(UserErrors.NotFouond);
+
             if (currentUserId == request.TargetUserId)
                 return Result.Failure(FollowErrors.CannotFollowYourself);
 
-            return await _followRepo.FollowAsync(currentUserId, request.TargetUserId, cancellation);
+            var result =  await _followRepo.FollowAsync(currentUserId, request.TargetUserId, cancellation);
+
+            if(!result)
+                return Result.Failure(FollowErrors.AlreadyFollowing);
+
+            return Result.Success();
         }
 
         public async Task<Result> UnFollowAsync(string currentUserId, FollowRequestDto request, CancellationToken cancellation = default)
         {
+            var targetUserIsExist = await _userRepo.IsExistAsync(request.TargetUserId, cancellation);
+            if (!targetUserIsExist)
+                return Result.Failure(UserErrors.NotFouond);
+
             if (currentUserId == request.TargetUserId)
                 return Result.Failure(FollowErrors.CannotFollowYourself);
 
-            return await _followRepo.UnFollowAsync(currentUserId, request.TargetUserId, cancellation);
+            var result = await _followRepo.UnFollowAsync(currentUserId, request.TargetUserId, cancellation);
+
+            if(!result)
+                return Result.Failure(FollowErrors.AlreadyUnfollowed);
+
+            return Result.Success();
         }
 
         public async Task<Result<List<FollowUserDto>>> GetFollowingAsync(string userId, CancellationToken cancellation = default)
         {
-            var followingResult = await _followRepo.GetFollowing(userId);
+            var isExistUser = await _userRepo.IsExistAsync(userId, cancellation);
 
-            if (followingResult.IsFailure)
-                return Result.Failure<List<FollowUserDto>>(followingResult.Error);
+            if (!isExistUser)
+                return Result.Failure<List<FollowUserDto>>(UserErrors.NotFouond);
 
-            var following = await followingResult.Value
+            var followingResult =  _followRepo.GetFollowingAsync(userId);
+
+            var following = await followingResult
                 .Select(x => new FollowUserDto
                 (
                     x.Id,
@@ -49,12 +70,14 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result<List<FollowUserDto>>> GetFollowersAsync(string userId, CancellationToken cancellation = default)
         {
-            var followersResult = await _followRepo.GetFollowers(userId);
+            var isExistUser = await _userRepo.IsExistAsync(userId, cancellation);
 
-            if (followersResult.IsFailure)
-                return Result.Failure<List<FollowUserDto>>(followersResult.Error);
+            if(!isExistUser)
+                return Result.Failure<List<FollowUserDto>>(UserErrors.NotFouond);
 
-            var followers = await followersResult.Value
+            var followersResult = _followRepo.GetFollowersAsync(userId);
+        
+            var followers = await followersResult
                 .Select(x => new FollowUserDto
                 (
                     x.Id,
@@ -65,14 +88,5 @@ namespace Mala3ib.BLL.Service.Implementation
 
             return Result.Success(followers);
         }
-
-        //public async Task<Result<int>> GetFollowersCountAsync(string userId, CancellationToken cancellation = default)
-        //{
-        //    return await _followRepo.GetFollowersCountAsync(userId);
-        //}
-        //public async Task<Result<int>> GetFollowingCountAsync(string userId, CancellationToken cancellation = default)
-        //{
-        //    return await _followRepo.GetFollowingCountAsync(userId);
-        //}
     }
 }

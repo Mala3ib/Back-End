@@ -33,6 +33,7 @@ namespace Mala3ib.API
             services.AddSingleton<IJwtProvider, JwtProvider>();
 
             #region Repo
+            services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IPlayerRepo, PlayerRepo>();
             services.AddScoped<IFieldRepo, FieldRepo>();
             services.AddScoped<IFieldOwnerRepo, FieldOwnerRepo>();

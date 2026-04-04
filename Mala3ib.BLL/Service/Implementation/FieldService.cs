@@ -30,22 +30,7 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success(fieldResponse!);
         }
 
-        public async Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default)
-        {
-            var field = await _fieldRepo.GetById(id)
-                .FirstOrDefaultAsync(cancellation);
-
-            if (field is null)
-                return Result.Failure(FieldErrors.NotFound);
-
-            var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
-
-            if (field.FieldOwnerId != ownerId.Value)
-                return Result.Failure(FieldErrors.Unauthorized);
-
-            await _fieldRepo.DeleteAsync(id, cancellation);
-            return Result.Success();
-        }
+        
 
         public async Task<Result<PaginatedList<FieldResponseDto>>> GetAllAsync(RequestFilter filter,  CancellationToken cancellation = default)
         {
@@ -80,7 +65,7 @@ namespace Mala3ib.BLL.Service.Implementation
             var columnName = FieldSortingConfig.ColumnMap[sortColumnKey];
 
             var direction = string.IsNullOrWhiteSpace(filter.SortDirection)
-                ? "ASC"
+                ? columnName == "Rating" ? "DESC" : "ASC"
                 : filter.SortDirection.ToUpper();
 
             if (direction != "ASC" && direction != "DESC")
@@ -162,10 +147,29 @@ namespace Mala3ib.BLL.Service.Implementation
                 Location = request.Location,
                 PricePerHour = request.PricePerHour
             };
+            
+            await _fieldRepo.UpdateAsync(id, field, cancellation);
 
-            return await _fieldRepo.UpdateAsync(id, field, cancellation);
+            return Result.Success();
         }
 
+        public async Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default)
+        {
+            var field = await _fieldRepo.GetById(id)
+                .FirstOrDefaultAsync(cancellation);
+
+            if (field is null)
+                return Result.Failure(FieldErrors.NotFound);
+
+            var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
+
+            if (field.FieldOwnerId != ownerId.Value)
+                return Result.Failure(FieldErrors.Unauthorized);
+
+            await _fieldRepo.DeleteAsync(id, cancellation);
+
+            return Result.Success();
+        }
         private async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation)
         {
             var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)

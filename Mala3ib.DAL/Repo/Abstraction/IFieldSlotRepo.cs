@@ -7,7 +7,8 @@ namespace Mala3ib.DAL.Repo.Abstraction
         IQueryable<FieldSlot> GetById(int id);
         Task<bool> IsSlotAvailableAsync(int fieldId, DateTime start, DateTime end, int? excludeSlotId = null, CancellationToken cancellation = default);
         Task AddAsync(FieldSlot fieldSlot);
-        Task<Result> UpdateAsync(int id, FieldSlot request, CancellationToken cancellation = default);
-        Task<Result> DeleteAsync(int id, CancellationToken cancellation = default);
+        Task<bool> IsExist(int id, CancellationToken cancellation = default);
+        Task UpdateAsync(int id, FieldSlot request, CancellationToken cancellation = default);
+        Task DeleteAsync(int id, CancellationToken cancellation = default);
     }
 }

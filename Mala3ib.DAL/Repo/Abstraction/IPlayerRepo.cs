@@ -4,8 +4,9 @@
     {
         Task AddAsync(Player player);
         IQueryable<Player> Get(string userId);
-        Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default);
-        Task<Result> UpdateAsync(string userId, Player request, CancellationToken cancellation = default);
+        Task<bool> IsExistAsync(string userId, CancellationToken cancellation = default);
+        Task DeleteAsync(string userId, CancellationToken cancellation = default);
+        Task UpdateAsync(string userId, Player request, CancellationToken cancellation = default);
         Task<int?> GetPlayerIdByUserIdAsync(string userId, CancellationToken cancellationToken = default);
     }
 }
