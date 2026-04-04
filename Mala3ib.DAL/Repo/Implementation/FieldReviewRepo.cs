@@ -18,10 +18,16 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task<bool> ExistsAsync(int fieldId, int playerId, CancellationToken cancellationToken = default)
+        public async Task<bool> IsExistsAsync(int fieldId, int playerId, CancellationToken cancellationToken = default)
         {
             return await _context.FieldReviews
                .AnyAsync(x => x.FieldId == fieldId && x.PlayerId == playerId && !x.IsDeleted, cancellationToken);
+        }
+
+        public async Task<bool> HasDeletedReview(int fieldId, int playerId, CancellationToken cancellationToken = default)
+        {
+            return await _context.FieldReviews
+               .AnyAsync(x => x.FieldId == fieldId && x.PlayerId == playerId && x.IsDeleted, cancellationToken);
         }
 
         public  async Task<FieldReview?> GetByIdAsync(int reviewId, CancellationToken cancellationToken = default)
@@ -36,16 +42,18 @@ namespace Mala3ib.DAL.Repo.Implementation
                 .Where(x => x.FieldId == fieldReview.FieldId && x.PlayerId == fieldReview.PlayerId)
                 .ExecuteUpdateAsync(setter =>
                     setter.SetProperty(f => f.Rating, fieldReview.Rating)
-                          .SetProperty(f => f.Comment, fieldReview.Comment));
+                          .SetProperty(f => f.Comment, fieldReview.Comment)
+                          .SetProperty(f => f.IsDeleted, false)
+                          .SetProperty(f => f.DateTime, fieldReview.DateTime));
         }      
 
         public async Task DeleteAsync(int reviewId, CancellationToken cancellationToken = default)
         {
-            var fieldReview = await _context.FieldReviews
-                .FirstOrDefaultAsync(x => x.Id == reviewId, cancellationToken);
-
-            fieldReview!.IsDeleted = true;
-            await _context.SaveChangesAsync(cancellationToken);
+            await _context.FieldReviews
+                .Where(x => x.Id == reviewId)
+                .ExecuteUpdateAsync(setter =>
+                    setter.SetProperty(r => r.IsDeleted, true)
+                );
         }
         public IQueryable<FieldReview> GetReview(int reviewId)
         {

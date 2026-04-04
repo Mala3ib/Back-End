@@ -17,6 +17,7 @@ namespace Mala3ib.BLL.Service.Implementation
         {
             var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)
                 .FirstOrDefaultAsync(cancellation);
+
             var field = await _fieldRepo.GetById(fieldId)
                 .FirstOrDefaultAsync(cancellation);
 
@@ -93,8 +94,9 @@ namespace Mala3ib.BLL.Service.Implementation
                 EndDate = request.EndDate,
                 IsBooked = request.IsBooked
             };
+            await _fieldSlotRepo.UpdateAsync(id, fieldSlot, cancellation);
 
-            return await _fieldSlotRepo.UpdateAsync(id, fieldSlot, cancellation);
+            return Result.Success();
         }
 
         public async Task<Result<IEnumerable<FieldSlotResponseDto>>> GetAvailableSlots(int fieldId, DateTime? date, CancellationToken cancellation = default)

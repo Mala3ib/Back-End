@@ -8,29 +8,22 @@
         {
             _context = context;
         }
-        public async Task<Result> FollowAsync(string myUserId, string targetUserId, CancellationToken cancellation)
+        public async Task<bool> FollowAsync(string myUserId, string targetUserId, CancellationToken cancellation)
         {
-            var targetExists = await _context.Users
-                .AnyAsync(x => x.Id == targetUserId && !x.IsDeleted, cancellation);
-
-            if (!targetExists)
-                return Result.Failure(UserErrors.NotFouond);
-
             var follow = await _context.Follows
                 .FirstOrDefaultAsync(x => x.FollowerId == myUserId && x.FollowingId == targetUserId, cancellation);
 
             if (follow is not null)
             {
                 if (!follow.IsDeleted)
-                    return Result.Failure(FollowErrors.AlreadyFollowing);
+                   return false; // AlreadyFollowed
 
                 // Restore soft deleted
-
                 follow.IsDeleted = false;
                 follow.CreatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync(cancellation);
-                return Result.Success();
+                return true;
             }
 
             var newFollow = new Follow
@@ -40,72 +33,47 @@
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Follows.Add(newFollow);
+            await _context.Follows.AddAsync(newFollow);
             await _context.SaveChangesAsync(cancellation);
 
-            return Result.Success();
+            return true;
         }
-        public async Task<Result> UnFollowAsync(string myUserId, string targetUserId, CancellationToken cancellation)
+
+        public async Task<bool> UnFollowAsync(string myUserId, string targetUserId, CancellationToken cancellation)
         {
-            var targetExists = await _context.Users
-                .AnyAsync(x => x.Id == targetUserId && !x.IsDeleted, cancellation);
-
-            if (!targetExists)
-                return Result.Failure(PlayerErrors.NotFound);
-
             var follow = await _context.Follows
                 .FirstOrDefaultAsync(x => x.FollowerId == myUserId && x.FollowingId == targetUserId, cancellation);
 
             if (follow is not null)
             {
                 if (follow.IsDeleted)
-                    return Result.Failure(FollowErrors.AlreadyUnfollowed);
+                    return false;
 
                 follow.IsDeleted = true;
 
                 await _context.SaveChangesAsync(cancellation);
-                return Result.Success();
+                return true;
             }
 
-            return Result.Failure(FollowErrors.AlreadyUnfollowed);
+            return false; 
         }
 
-        public async Task<Result<IQueryable<ApplicationUser>>> GetFollowing(string userId)
+        public IQueryable<ApplicationUser> GetFollowingAsync(string userId)
         {
-            var isExist = await _context.Users.AnyAsync(x => x.Id == userId);
-            if (!isExist)
-                return Result.Failure<IQueryable<ApplicationUser>>(UserErrors.NotFouond);
-            
-            return Result.Success(_context.Follows
+            return _context.Follows
                 .Where(x => x.FollowerId == userId && !x.IsDeleted)
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => x.Following)
-                .AsNoTracking());
+                .AsNoTracking();
         }
 
-        public async Task<Result<IQueryable<ApplicationUser>>> GetFollowers(string userId)
+        public IQueryable<ApplicationUser> GetFollowersAsync(string userId)
         {
-            var isExist =  await _context.Users.AnyAsync(x => x.Id == userId);
-            if (!isExist)
-                return Result.Failure<IQueryable<ApplicationUser>>(UserErrors.NotFouond);
-
-            return Result.Success( _context.Follows
+            return _context.Follows
                 .Where(x => x.FollowingId == userId && !x.IsDeleted)
                 .OrderByDescending(x => x.CreatedAt)
                 .Select(x => x.Follower)
-                .AsNoTracking());
+                .AsNoTracking();
         }
-
-
-        //public async Task<int> GetFollowersCountAsync(string userId, CancellationToken cancellation = default)
-        //{
-        //    return await _context.Follows
-        //        .CountAsync(x => x.FollowingId == userId && !x.IsDeleted, cancellation);
-        //}
-        //public async Task<int> GetFollowingCountAsync(string userId, CancellationToken cancellation = default)
-        //{
-        //    return await _context.Follows
-        //        .CountAsync(x => x.FollowerId == userId && !x.IsDeleted, cancellation);
-        //}
     }
 }

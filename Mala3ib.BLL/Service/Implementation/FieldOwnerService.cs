@@ -32,7 +32,9 @@ namespace Mala3ib.BLL.Service.Implementation
             if (!fieldOwnerIsExist)
                 return Result.Failure(FieldOwnerErrors.NotFound);
 
-            return await _fieldOwnerRepo.DeleteAsync(userId, cancellation);
+            await _fieldOwnerRepo.DeleteAsync(userId, cancellation);
+
+            return Result.Success();
         }
 
         public async Task<Result<FieldOwnerProfileDto>> GetAsync(string userId, CancellationToken cancellation = default)
@@ -73,7 +75,8 @@ namespace Mala3ib.BLL.Service.Implementation
                 }
             };
 
-            return await _fieldOwnerRepo.UpdateAsync(userId, fieldOwner, cancellation);
+            await _fieldOwnerRepo.UpdateAsync(userId, fieldOwner, cancellation);
+            return Result.Success();
         }
         public async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation = default)
         {

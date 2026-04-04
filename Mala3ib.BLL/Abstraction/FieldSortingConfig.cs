@@ -8,6 +8,6 @@
             ["RATING"] = "Rating",
         };
 
-        public const string DefaultColumn = "PRICEPERHOUR";
+        public const string DefaultColumn = "RATING";
     }
 }

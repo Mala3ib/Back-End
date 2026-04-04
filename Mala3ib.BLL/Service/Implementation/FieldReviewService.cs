@@ -27,7 +27,7 @@ namespace Mala3ib.BLL.Service.Implementation
             if (!fieldExists)
                 return Result.Failure(FieldErrors.NotFound);
 
-            var alreadyReviewed = await _fieldReviewRepo.ExistsAsync(fieldId, (int)playerId , cancellationToken);
+            var alreadyReviewed = await _fieldReviewRepo.IsExistsAsync(fieldId, (int)playerId , cancellationToken);
 
             if (alreadyReviewed)
                 return Result.Failure(FieldReviewErrors.HasReview);
@@ -36,6 +36,14 @@ namespace Mala3ib.BLL.Service.Implementation
             review!.PlayerId = (int)playerId;
             review!.FieldId = fieldId;
             review!.DateTime = DateTime.UtcNow;
+
+            var hasDeletedReview = await _fieldReviewRepo.HasDeletedReview(fieldId, (int)playerId, cancellationToken);
+
+            if (hasDeletedReview)
+            {
+                await _fieldReviewRepo.UpdateAsync(review, cancellationToken);
+                return Result.Success();
+            }
 
             await _fieldReviewRepo.AddAsync(review, cancellationToken);
             return Result.Success();

@@ -14,22 +14,6 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.SaveChangesAsync();
         }
 
-        public async Task<Result> DeleteAsync(int id, CancellationToken cancellation = default)
-        {
-            var isExist = await _context.FieldSlots.AnyAsync(p => p.Id == id && !p.IsDeleted, cancellation);
-
-            if (!isExist)
-                return Result.Failure(FieldSlotErrors.NotFound);
-
-            var fieldSlot = _context.FieldSlots
-                .FirstOrDefault(x => x.Id == id);
-
-            fieldSlot!.IsDeleted = true;
-
-            await _context.SaveChangesAsync(cancellation);
-            return Result.Success();
-        }
-
         public IQueryable<FieldSlot> GetAvailableSlots(int fieldId, DateTime day)
         {
             var startOfDay = day.Date;
@@ -81,14 +65,15 @@ namespace Mala3ib.DAL.Repo.Implementation
 
             return !exists;
         }
-        public async Task<Result> UpdateAsync(int id, FieldSlot request, CancellationToken cancellation = default)
+
+        public async Task<bool> IsExist(int id, CancellationToken cancellation = default)
         {
-            var isExist = await _context.FieldSlots
+            return await _context.FieldSlots
                 .AnyAsync(f => f.Id == id && !f.IsDeleted, cancellation);
+        }
 
-            if (!isExist)
-                return Result.Failure(FieldSlotErrors.NotFound);
-
+        public async Task UpdateAsync(int id, FieldSlot request, CancellationToken cancellation = default)
+        {
             await _context.FieldSlots
                 .Where(f => f.Id == id)
                 .ExecuteUpdateAsync(setter =>
@@ -96,9 +81,15 @@ namespace Mala3ib.DAL.Repo.Implementation
                     .SetProperty(x => x.EndDate, request.EndDate)
                     .SetProperty(x => x.IsBooked, request.IsBooked)
                 );
+        }
 
-            await _context.SaveChangesAsync(cancellation);
-            return Result.Success();
+        public async Task DeleteAsync(int id, CancellationToken cancellation = default)
+        {
+            await _context.FieldSlots
+                .Where(f => f.Id == id)
+                .ExecuteUpdateAsync(setter =>
+                 setter.SetProperty(x => x.IsDeleted, true)
+            );
         }
     }
 }

@@ -4,8 +4,8 @@
     {
         Task AddAsync(FieldOwner fieldOwner);
         IQueryable<FieldOwner> Get(string userId);
-        Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default);
-        Task<Result> UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default);
+        Task DeleteAsync(string userId, CancellationToken cancellation = default);
+        Task UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default);
         IQueryable<FieldOwner> GetOwnerByUserId(string userId);
         Task<bool> FieleOwnerIsExist(string userId, CancellationToken cancellation = default);
     }
