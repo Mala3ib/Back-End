@@ -42,6 +42,14 @@ namespace Mala3ib.DAL.Repo.Implementation
             return field;
         }
 
+        public async Task<decimal> GetPrice(int id, CancellationToken cancellation = default)
+        {
+            return await _context.Fields
+                .Where(x => x.Id == id && !x.IsDeleted)
+                .Select(x => x.PricePerHour)
+                .FirstOrDefaultAsync(cancellation);
+        }
+
         public async Task<bool> IsExistAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Fields

@@ -1,4 +1,4 @@
-﻿namespace Mala3ib.DAL.Errors
+﻿namespace Mala3ib.BLL.Errors
 {
     public class FieldReviewErrors
     {

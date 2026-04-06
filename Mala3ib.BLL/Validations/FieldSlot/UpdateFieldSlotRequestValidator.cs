@@ -19,6 +19,9 @@ namespace Mala3ib.BLL.Validations.FieldSlot
             RuleFor(x => x)
                 .Must(x => x.EndDate > x.StartDate)
                 .WithMessage("End date must be greater than start date");
+
+            RuleFor(x => x.MaxPlayers)
+                .GreaterThan(0);
         }
     }
 }
