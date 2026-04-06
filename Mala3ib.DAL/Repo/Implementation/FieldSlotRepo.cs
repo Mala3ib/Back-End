@@ -80,6 +80,8 @@ namespace Mala3ib.DAL.Repo.Implementation
                     setter.SetProperty(x => x.StartDate, request.StartDate)
                     .SetProperty(x => x.EndDate, request.EndDate)
                     .SetProperty(x => x.IsBooked, request.IsBooked)
+                    .SetProperty(x => x.Price, request.Price)
+                    .SetProperty(x => x.MaxPlayers, request.MaxPlayers)
                 );
         }
 

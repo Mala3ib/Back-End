@@ -7,6 +7,8 @@ namespace Mala3ib.DAL.Entities
         public DateTime EndDate { get; set; }
         public bool IsBooked { get; set; } = false;
         public bool IsDeleted { get; set; } = false;
+        public int MaxPlayers { get; set; }
+        public decimal Price { get; set; }
         public int FieldId { get; set; }
         public Field Field { get; set; } = default!;
     }
