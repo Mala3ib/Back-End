@@ -14,7 +14,7 @@ namespace Mala3ib.API.Controllers
             _invitationService = invitationService;
         }
         [HttpPost("")]
-        public async Task<IActionResult> Follow([FromBody] SendInviationDto request)
+        public async Task<IActionResult> Invite([FromBody] SendInviationDto request)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
