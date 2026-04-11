@@ -40,12 +40,6 @@ namespace Mala3ib.DAL.Repo.Implementation
             return true;
         }
 
-        public async Task<bool> ExistsAsync(int receiverId, int invitationId, CancellationToken cancellation = default)
-        {
-            return await _context.Invitations
-                .AnyAsync(x => x.RecieverId == receiverId && x.Id == invitationId && !x.IsDeleted, cancellation);
-        }
-
         public IQueryable<Invitation> GetById(int id)
         {
             var invitation = _context.Invitations
@@ -55,19 +49,19 @@ namespace Mala3ib.DAL.Repo.Implementation
             return invitation;
         }
 
-        public IQueryable<Invitation> GetReceivedInvitations(int id)
+        public IQueryable<Invitation> GetReceivedInvitations(int id, InvitationStatus status)
         {
             var invitation = _context.Invitations
-                .Where(x => x.RecieverId == id && !x.IsDeleted)
+                .Where(x => x.RecieverId == id && !x.IsDeleted && x.Status == status)
                 .AsNoTracking();
 
             return invitation;
         }
 
-        public IQueryable<Invitation> GetSentInvitations(int id)
+        public IQueryable<Invitation> GetSentInvitations(int id, InvitationStatus status)
         {
             var invitation = _context.Invitations
-                .Where(x => x.SenderId == id && !x.IsDeleted)
+                .Where(x => x.SenderId == id && !x.IsDeleted && x.Status == status)
                 .AsNoTracking();
 
             return invitation;

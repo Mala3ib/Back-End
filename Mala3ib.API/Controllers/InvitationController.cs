@@ -1,4 +1,5 @@
 using Mala3ib.BLL.Contracts.Invitation;
+using Mala3ib.DAL.Enums;
 
 namespace Mala3ib.API.Controllers
 {
@@ -57,6 +58,20 @@ namespace Mala3ib.API.Controllers
             var result = await _invitationService.DeleteAsync(id, userId!, cancellation);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+        [HttpGet("recieved")]
+        public async Task<IActionResult> GetRecievedInvitations([FromQuery] InvitationStatus status, CancellationToken cancellation)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _invitationService.GetRecievedInvitations(userId!, status, cancellation);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
+        }
+        [HttpGet("sent")]
+        public async Task<IActionResult> GetSentInvitations([FromQuery] InvitationStatus status, CancellationToken cancellation)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _invitationService.GetSentInvitations(userId!, status, cancellation);
+            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
     }
 }

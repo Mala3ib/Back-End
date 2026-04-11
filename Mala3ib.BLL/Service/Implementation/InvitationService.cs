@@ -63,10 +63,12 @@ namespace Mala3ib.BLL.Service.Implementation
         public async Task<Result> AcceptAsync(string currentUserId, int invitationId, CancellationToken cancellation = default)
         {
             return await HandleInvitationAsync(currentUserId, invitationId, InvitationStatus.Accepted, cancellation);
+            // Logic
         }
         public async Task<Result> RejectAsync(string currentUserId, int invitationId, CancellationToken cancellation = default)
         {
             return await HandleInvitationAsync(currentUserId, invitationId, InvitationStatus.Rejected, cancellation);
+            // Logic
         }
 
         public async Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default)
@@ -107,7 +109,7 @@ namespace Mala3ib.BLL.Service.Implementation
             if (currentPlayer.Id == captain.Id)
                 return Result.Failure(InvitationErrors.CannotInviteYourself);
 
-            if (fieldSlot.Players.Count >= fieldSlot.MaxPlayers)
+            if (fieldSlot.Players.Count == fieldSlot.MaxPlayers)
                 return Result.Failure(InvitationErrors.FieldSlotIsFull);
 
             var result = await _invitationRepo.InviteAsync(currentPlayer.Id, captain.Id, fieldSlotId, InvitationType.Request, cancellation);
@@ -116,6 +118,42 @@ namespace Mala3ib.BLL.Service.Implementation
                 return Result.Failure(InvitationErrors.AlreadyRequested);
 
             return Result.Success();
+        }
+
+        public async Task<Result<IEnumerable<InvitationResponseDto>>> GetSentInvitations(string currentUserId, InvitationStatus status, CancellationToken cancellation = default)
+        {
+            var player = _playerRepo.Get(currentUserId).FirstOrDefault();
+            if (player == null)
+                return Result.Failure<IEnumerable<InvitationResponseDto>>(PlayerErrors.NotFound);
+
+            var invitations = await _invitationRepo.GetSentInvitations(player.Id, status)
+                .Select(i => new InvitationResponseDto(
+                    i.SenderId,
+                    i.RecieverId,
+                    i.FieldSlotId,
+                    i.Status,
+                    i.Type
+                    )).ToListAsync(cancellation);
+
+            return Result.Success<IEnumerable<InvitationResponseDto>>(invitations);
+        }
+
+        public async Task<Result<IEnumerable<InvitationResponseDto>>> GetRecievedInvitations(string currentUserId, InvitationStatus status, CancellationToken cancellation = default)
+        {
+            var player = _playerRepo.Get(currentUserId).FirstOrDefault();
+            if (player == null)
+                return Result.Failure<IEnumerable<InvitationResponseDto>>(PlayerErrors.NotFound);
+
+            var invitations = await _invitationRepo.GetReceivedInvitations(player.Id, status)
+                .Select(i => new InvitationResponseDto(
+                    i.SenderId,
+                    i.RecieverId,
+                    i.FieldSlotId,
+                    i.Status,
+                    i.Type
+                    )).ToListAsync(cancellation);
+
+            return Result.Success<IEnumerable<InvitationResponseDto>>(invitations);
         }
     }
 }
