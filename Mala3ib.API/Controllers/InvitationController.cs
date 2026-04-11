@@ -13,12 +13,21 @@ namespace Mala3ib.API.Controllers
         {
             _invitationService = invitationService;
         }
-        [HttpPost("")]
+        [HttpPost("Invite/")]
         public async Task<IActionResult> Invite([FromBody] SendInviationDto request)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
 
             var result = await _invitationService.SendAsync(userId, request);
+
+            return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+        [HttpPost("Request/{fieldSlotId}")]
+        public async Task<IActionResult> request([FromRoute] int fieldSlotId)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)!.Value;
+
+            var result = await _invitationService.RequestAsync(userId, fieldSlotId);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }

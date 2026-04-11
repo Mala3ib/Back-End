@@ -11,6 +11,7 @@ namespace Mala3ib.DAL.Database
         public DbSet<Field> Fields { get; set; }
         public DbSet<FieldImage> FieldImages { get; set; }
         public DbSet<FieldSlot> FieldSlots { get; set; }
+        public DbSet<FieldSlotPlayer> FieldSlotPlayers { get; set; }
         public DbSet<FieldReview> FieldReviews { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<EmailVerficationOtp> EmailVerficationOtps { get; set; }
@@ -98,6 +99,19 @@ namespace Mala3ib.DAL.Database
                 .HasOne(i => i.Reciever)
                 .WithMany()
                 .HasForeignKey(i => i.RecieverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Player and fieldSlot
+            modelBuilder.Entity<FieldSlotPlayer>()
+                .HasOne(x => x.FieldSlot)
+                .WithMany(x => x.Players)
+                .HasForeignKey(x => x.FieldSlotId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FieldSlotPlayer>()
+                .HasOne(x => x.Player)
+                .WithMany()
+                .HasForeignKey(x => x.PlayerId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

@@ -7,10 +7,10 @@ namespace Mala3ib.DAL.Repo.Implementation
         {
             _context = context;
         }
-        public async Task<bool> InviteAsync(string myUserId, string targetUserId, int fieldSlotId, CancellationToken cancellation)
+        public async Task<bool> InviteAsync(int sendPlayerId, int targetPlayerId, int fieldSlotId, InvitationType type, CancellationToken cancellation)
         {
             var invitation = await _context.Invitations
-                .FirstOrDefaultAsync(x => x.SenderId == myUserId && x.RecieverId == targetUserId && x.FieldSlotId == fieldSlotId, cancellation);
+                .FirstOrDefaultAsync(x => x.SenderId == sendPlayerId && x.RecieverId == targetPlayerId && x.FieldSlotId == fieldSlotId, cancellation);
 
             if (invitation is not null)
             {
@@ -27,10 +27,11 @@ namespace Mala3ib.DAL.Repo.Implementation
 
             var newInviation = new Invitation
             {
-                SenderId = myUserId,
-                RecieverId = targetUserId,
+                SenderId = sendPlayerId,
+                RecieverId = targetPlayerId,
                 FieldSlotId = fieldSlotId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                Type = type
             };
 
             await _context.Invitations.AddAsync(newInviation);
@@ -39,7 +40,7 @@ namespace Mala3ib.DAL.Repo.Implementation
             return true;
         }
 
-        public async Task<bool> ExistsAsync(string receiverId, int invitationId, CancellationToken cancellation = default)
+        public async Task<bool> ExistsAsync(int receiverId, int invitationId, CancellationToken cancellation = default)
         {
             return await _context.Invitations
                 .AnyAsync(x => x.RecieverId == receiverId && x.Id == invitationId && !x.IsDeleted, cancellation);
@@ -54,7 +55,7 @@ namespace Mala3ib.DAL.Repo.Implementation
             return invitation;
         }
 
-        public IQueryable<Invitation> GetReceivedInvitations(string id)
+        public IQueryable<Invitation> GetReceivedInvitations(int id)
         {
             var invitation = _context.Invitations
                 .Where(x => x.RecieverId == id && !x.IsDeleted)
@@ -63,7 +64,7 @@ namespace Mala3ib.DAL.Repo.Implementation
             return invitation;
         }
 
-        public IQueryable<Invitation> GetSentInvitations(string id)
+        public IQueryable<Invitation> GetSentInvitations(int id)
         {
             var invitation = _context.Invitations
                 .Where(x => x.SenderId == id && !x.IsDeleted)
@@ -89,5 +90,6 @@ namespace Mala3ib.DAL.Repo.Implementation
                 setter.SetProperty(x => x.IsDeleted, true)
                 );
         }
+
     }
 }

@@ -7,6 +7,10 @@ namespace Mala3ib.DAL.Database.EntitiesConfigurations
             builder.Property(i => i.Status)
             .IsRequired()
             .HasConversion<string>();
+
+            builder.Property(i => i.Type)
+            .IsRequired()
+            .HasConversion<string>();
         }
     }
 }

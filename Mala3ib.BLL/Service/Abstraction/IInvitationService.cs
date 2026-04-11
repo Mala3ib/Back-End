@@ -8,6 +8,6 @@ namespace Mala3ib.BLL.Service.Abstraction
         Task<Result> AcceptAsync(string currentUserId, int invitationId, CancellationToken cancellation = default);
         Task<Result> RejectAsync(string currentUserId, int invitationId, CancellationToken cancellation = default);
         Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default);
-        // Join Request
+        Task<Result> RequestAsync(string currentUserId, int fieldSlotId, CancellationToken cancellation = default);
     }
 }

@@ -45,6 +45,8 @@ namespace Mala3ib.DAL.Repo.Implementation
         {
             var fieldSlot = _context.FieldSlots
                 .Where(x => x.Id == id && !x.IsDeleted)
+                .Include(x => x.Players)
+                .ThenInclude(x => x.Player)
                 .AsNoTracking();
 
             return fieldSlot;

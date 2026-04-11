@@ -16,6 +16,10 @@ namespace Mala3ib.BLL.Errors
             = new Error("Invitation.Unauthorized", "User dont have access on this invitation", ErrorType.BadRequest);
         public static Error AlreadySent
             = new Error("Invitation.AlreadySent", "Invitation already sent", ErrorType.BadRequest);
+        public static Error AlreadyRequested
+            = new Error("Invitation.AlreadyRequested", "Invitation already requested", ErrorType.BadRequest);
+        public static Error FieldSlotIsFull
+            = new Error("Invitation.FieldSlotIsFull", "FieldSlot Is Full", ErrorType.BadRequest);
 
     }
 }
