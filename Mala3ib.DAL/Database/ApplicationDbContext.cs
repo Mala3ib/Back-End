@@ -11,7 +11,9 @@ namespace Mala3ib.DAL.Database
         public DbSet<Field> Fields { get; set; }
         public DbSet<FieldImage> FieldImages { get; set; }
         public DbSet<FieldSlot> FieldSlots { get; set; }
+        public DbSet<FieldSlotPlayer> FieldSlotPlayers { get; set; }
         public DbSet<FieldReview> FieldReviews { get; set; }
+        public DbSet<Invitation> Invitations { get; set; }
         public DbSet<EmailVerficationOtp> EmailVerficationOtps { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,10 +35,10 @@ namespace Mala3ib.DAL.Database
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<FieldOwner>()
-                 .HasOne(f => f.User)
-                 .WithOne()
-                 .HasForeignKey<FieldOwner>(f => f.UserId)
-                 .OnDelete(DeleteBehavior.Restrict);
+                .HasOne(f => f.User)
+                .WithOne()
+                .HasForeignKey<FieldOwner>(f => f.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Follow
             modelBuilder.Entity<Follow>()
@@ -72,7 +74,7 @@ namespace Mala3ib.DAL.Database
                 .HasForeignKey(fs => fs.FieldId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-           
+
             // FieldReviews
             modelBuilder.Entity<FieldReview>()
                 .HasOne(fr => fr.Field)
@@ -84,6 +86,32 @@ namespace Mala3ib.DAL.Database
                 .HasOne(fr => fr.Player)
                 .WithMany(p => p.FieldReviews)
                 .HasForeignKey(fr => fr.PlayerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Invitaions
+            modelBuilder.Entity<Invitation>()
+                .HasOne(i => i.Sender)
+                .WithMany()
+                .HasForeignKey(i => i.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Invitation>()
+                .HasOne(i => i.Reciever)
+                .WithMany()
+                .HasForeignKey(i => i.RecieverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Player and fieldSlot
+            modelBuilder.Entity<FieldSlotPlayer>()
+                .HasOne(x => x.FieldSlot)
+                .WithMany(x => x.Players)
+                .HasForeignKey(x => x.FieldSlotId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<FieldSlotPlayer>()
+                .HasOne(x => x.Player)
+                .WithMany()
+                .HasForeignKey(x => x.PlayerId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }
