@@ -6,28 +6,29 @@
     {
         private readonly IPlayerService _playerService;
         private readonly IFieldOwnerService _fieldOwnerService;
-        public AccountController(IPlayerService playerService, IFieldOwnerService fieldOwnerService)
+        private readonly IFileService _fileService;
+        public AccountController(IPlayerService playerService, IFieldOwnerService fieldOwnerService, IFileService fileService)
         {
             _playerService = playerService;
             _fieldOwnerService = fieldOwnerService;
+            _fileService = fileService;
         }
 
         [Authorize]
         [HttpGet("player/{userId}")]
-        public async Task<IActionResult> GetPlayer([FromRoute] string userId)
+        public async Task<IActionResult> GetPlayer([FromRoute] string userId, CancellationToken cancellation)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _playerService.GetAsync(currentUserId!, userId);
+            var result = await _playerService.GetAsync(currentUserId!, userId, cancellation);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
 
         [Authorize]
-        [HttpGet("field-owner")]
-        public async Task<IActionResult> GetOwner()
+        [HttpGet("field-owner/{userId}")]
+        public async Task<IActionResult> GetOwner([FromRoute] string userId, CancellationToken cancellation)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _fieldOwnerService.GetAsync(userId!);
+            var result = await _fieldOwnerService.GetAsync(userId, cancellation);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
@@ -62,9 +63,10 @@
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
 
-        [Authorize(Roles = DefaultRoles.FieldOwner)]
-        [HttpDelete("field-owner")]
-        public async Task<IActionResult> DeleteOwner(CancellationToken cancellation)
+        // return to this endpoint 
+        [Authorize(Roles = $"{DefaultRoles.FieldOwner},{DefaultRoles.Admin}")]
+        [HttpDelete("field-owner/{id}")]
+        public async Task<IActionResult> DeleteOwner([FromRoute] string id, CancellationToken cancellation)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var result = await _fieldOwnerService.DeleteAsync(userId!);
@@ -90,6 +92,28 @@
             var result = await _fieldOwnerService.UpdateAsync(userId!, request, cancellation);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
+        }
+
+        [HttpPost("upload-profile-image")]
+        [Authorize]
+        public async Task<IActionResult> UploadImage([FromForm] UploadImageRequest request, CancellationToken cancellation)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            await _fileService.UploadImageAsync(userId!, request.Image, cancellation);
+
+            return Created();
+        }
+
+        [HttpDelete("delete-profile-image")]
+        [Authorize]
+        public async Task<IActionResult> DeleteProfileImage(CancellationToken cancellationToken)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            await _fileService.DeleteProfileImageAsync(userId!, cancellationToken);
+
+            return NoContent();
         }
     }
 }

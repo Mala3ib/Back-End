@@ -6,7 +6,6 @@
         string FirstName,
         string LastName,
         string PhoneNumber,
-        string Image,
         DateOnly DateOfBirth
     );
 }

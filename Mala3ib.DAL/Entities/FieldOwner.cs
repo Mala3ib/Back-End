@@ -5,8 +5,7 @@ namespace Mala3ib.DAL.Entities
         public int Id { get; set; }
         public DateOnly DateOfBirth { get; set; }
         public bool IsDeleted { get; set; } = false;
-        public string? Image { get; set; }
-        public FieldStatus IsApproved { get; set; }
+        public Status Status { get; set; }
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; } = default!;
         public ICollection<Field> Fields { get; set; } = new List<Field>();

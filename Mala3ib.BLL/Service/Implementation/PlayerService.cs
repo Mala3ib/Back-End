@@ -23,6 +23,7 @@ namespace Mala3ib.BLL.Service.Implementation
                     p.User.FirstName,
                     p.User.LastName,
                     p.User.PhoneNumber!,
+                    p.User.Image,
                     p.DateOfBirth,
                     p.User.Followers.Count(x => !x.IsDeleted),
                     p.User.Following.Count(x => !x.IsDeleted),
