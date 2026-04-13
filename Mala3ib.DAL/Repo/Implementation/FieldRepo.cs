@@ -53,7 +53,7 @@ namespace Mala3ib.DAL.Repo.Implementation
         public async Task<bool> IsExistAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _context.Fields
-                .AnyAsync(x => x.Id == id  && !x.IsDeleted, cancellationToken);
+                .AnyAsync(x => x.Id == id && !x.IsDeleted, cancellationToken);
         }
 
         public async Task UpdateAsync(int id, Field request, CancellationToken cancellation = default)

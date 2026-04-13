@@ -39,9 +39,9 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> UpdateAsync(string userId, UpdatePlayerRequestDto request, CancellationToken cancellation = default)
         {
-            var isExist = await _playerRepo.IsExistAsync(userId, cancellation);
+            var oldPlayer = _playerRepo.Get(userId).FirstOrDefault();
 
-            if (!isExist)
+            if (oldPlayer == null)
                 return Result.Failure(PlayerErrors.NotFound);
 
             var player = new Player
@@ -76,9 +76,9 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
         {
-            var isExist = await _playerRepo.IsExistAsync(userId, cancellation);
+            var oldPlayer = _playerRepo.Get(userId).FirstOrDefault();
 
-            if (!isExist)
+            if (oldPlayer == null)
                 return Result.Failure(PlayerErrors.NotFound);
 
             await _playerRepo.DeleteAsync(userId, cancellation);

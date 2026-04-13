@@ -488,3 +488,7 @@ $RECYCLE.BIN/
 .vscode/
 
 /Mala3ib.DAL/Migrations/
+
+Mala3ib.BLL.csproj.lscache
+Mala3ib.API.csproj.lscache
+Mala3ib.DAL.csproj.lscache

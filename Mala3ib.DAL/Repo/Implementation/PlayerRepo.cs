@@ -25,10 +25,10 @@
             return player;
         }
 
-        public async Task<bool> IsExistAsync(string userId, CancellationToken cancellation = default)
+        public async Task<bool> IsExistAsync(int Id, CancellationToken cancellation = default)
         {
             return await _context.Players
-                .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
+                .AnyAsync(p => p.Id == Id && !p.IsDeleted, cancellation);
         }
 
         public async Task UpdateAsync(string userId, Player request, CancellationToken cancellation = default)
@@ -64,7 +64,6 @@
                     .SetProperty(u => u.IsDeleted, true)
                 );
         }
-
         public async Task<int?> GetPlayerIdByUserIdAsync(string userId, CancellationToken cancellationToken = default)
         {
             return await _context.Players

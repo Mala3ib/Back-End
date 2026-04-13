@@ -11,5 +11,6 @@ namespace Mala3ib.DAL.Entities
         public decimal Price { get; set; }
         public int FieldId { get; set; }
         public Field Field { get; set; } = default!;
+        public ICollection<FieldSlotPlayer> Players { get; set; } = new List<FieldSlotPlayer>();
     }
 }
