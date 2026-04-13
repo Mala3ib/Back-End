@@ -75,5 +75,30 @@ namespace Mala3ib.DAL.Repo.Implementation
                 setter.SetProperty(x => x.IsDeleted, true)
                 );
         }
+
+        public async Task<int> GetFieldImagesCountAsync(int id, CancellationToken cancellation = default)
+        {
+            return await _context.FieldImages.CountAsync(x => x.FieldId == id && !x.IsDeleted, cancellation);
+        }
+
+        public async Task UploadImageAsync(List<FieldImage> fieldImages, CancellationToken cancellation = default)
+        {
+            await _context.FieldImages.AddRangeAsync(fieldImages, cancellation);
+            await _context.SaveChangesAsync(cancellation);
+        }
+
+        public async Task<FieldImage?> GetImageAsync(int imageId, CancellationToken cancellation = default)
+        {
+            return await _context.FieldImages.FirstOrDefaultAsync(x => x.Id == imageId && !x.IsDeleted, cancellation);
+        }
+
+        public async Task DeleteImageAsync(int fieldId, int imageId, CancellationToken cancellation = default)
+        {
+            await _context.FieldImages
+                .Where(x => x.FieldId == fieldId && x.Id == imageId)
+                .ExecuteUpdateAsync(setter =>
+                setter.SetProperty(x => x.IsDeleted, true)
+                , cancellation);
+        }
     }
 }

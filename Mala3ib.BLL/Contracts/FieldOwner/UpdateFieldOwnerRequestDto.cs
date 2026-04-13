@@ -4,7 +4,6 @@ namespace Mala3ib.BLL.Contracts.FieldOwner
         string FirstName,
         string LastName,
         string PhoneNumber,
-        DateOnly DateOfBirth,
-        FieldStatus IsApproved
+        DateOnly DateOfBirth
     );
 }

@@ -7,6 +7,6 @@
         Task DeleteAsync(string userId, CancellationToken cancellation = default);
         Task UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default);
         IQueryable<FieldOwner> GetOwnerByUserId(string userId);
-        Task<bool> FieleOwnerIsExist(string userId, CancellationToken cancellation = default);
+        Task<bool> IsExistAsync(string userId, CancellationToken cancellation = default);
     }
 }

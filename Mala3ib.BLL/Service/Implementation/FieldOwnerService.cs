@@ -1,3 +1,4 @@
+
 namespace Mala3ib.BLL.Service.Implementation
 {
     public class FieldOwnerService : IFieldOwnerService
@@ -27,7 +28,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> DeleteAsync(string userId, CancellationToken cancellation = default)
         {
-            var fieldOwnerIsExist = await _fieldOwnerRepo.FieleOwnerIsExist(userId, cancellation);
+            var fieldOwnerIsExist = await _fieldOwnerRepo.IsExistAsync(userId, cancellation);
 
             if (!fieldOwnerIsExist)
                 return Result.Failure(FieldOwnerErrors.NotFound);
@@ -46,7 +47,7 @@ namespace Mala3ib.BLL.Service.Implementation
                     p.User.LastName,
                     p.User.PhoneNumber!,
                     p.DateOfBirth,
-                    p.IsApproved
+                    p.User.Image
                 ))
                 .FirstOrDefaultAsync(cancellation);
 
@@ -55,17 +56,16 @@ namespace Mala3ib.BLL.Service.Implementation
 
             return Result.Success(fieldOwner);
         }
-
+        
         public async Task<Result> UpdateAsync(string userId, UpdateFieldOwnerRequestDto request, CancellationToken cancellation = default)
         {
-            var fieldOwnerIsExist = await _fieldOwnerRepo.FieleOwnerIsExist(userId, cancellation);
+            var fieldOwnerIsExist = await _fieldOwnerRepo.IsExistAsync(userId, cancellation);
 
             if(!fieldOwnerIsExist)
                 return Result.Failure(FieldOwnerErrors.NotFound);
 
             var fieldOwner = new FieldOwner
             {
-                IsApproved = request.IsApproved,
                 DateOfBirth = request.DateOfBirth,
                 User = new ApplicationUser
                 {
@@ -74,19 +74,40 @@ namespace Mala3ib.BLL.Service.Implementation
                     PhoneNumber = request.PhoneNumber
                 }
             };
-
             await _fieldOwnerRepo.UpdateAsync(userId, fieldOwner, cancellation);
             return Result.Success();
         }
-        public async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation = default)
+
+        public async Task<Result<FieldOwnerDashboardDto>> GetDashboardAsync(string userId, CancellationToken cancellation = default)
         {
-            var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)
-                .FirstOrDefaultAsync(cancellation);
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
 
-            if (owner == null)
-                return Result.Failure<int>(FieldOwnerErrors.NotFound);
+            var result = await _fieldOwnerRepo.Get(userId)
+                .Select(fo => new FieldOwnerDashboardDto
+                (
+                    fo.Fields.Count(f => !f.IsDeleted),
+                    fo.Fields
+                        .SelectMany(f => f.Slots)
+                        .Count(s =>
+                            s.StartDate < tomorrow &&
+                            s.EndDate >= today &&
+                            s.IsBooked
+                        ),
+                    fo.Fields
+                        .SelectMany(f => f.Slots)
+                        .Count(s =>
+                            s.StartDate < tomorrow &&
+                            s.EndDate >= today &&
+                            !s.IsBooked
+                        )
+                ))
+                .FirstOrDefaultAsync();
 
-            return Result.Success(owner.Id);
+            if(result is null)
+                return Result.Failure<FieldOwnerDashboardDto>(FieldOwnerErrors.NotFound);
+
+            return Result.Success(result);
         }
     }
 }
