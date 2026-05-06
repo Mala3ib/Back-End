@@ -1,6 +1,3 @@
-using Hangfire;
-using Mala3ib.DAL.Abstraction.Const;
-
 namespace Mala3ib.API;
 
 public class Program
@@ -39,6 +36,8 @@ public class Program
         app.MapControllers();
 
         app.UseExceptionHandler();
+
+        app.MapStaticAssets();
 
         app.Run();
     }

@@ -1,4 +1,4 @@
-﻿namespace Mala3ib.DAL.Repo.Abstraction
+namespace Mala3ib.DAL.Repo.Abstraction
 {
     public interface IFieldOwnerRepo
     {
