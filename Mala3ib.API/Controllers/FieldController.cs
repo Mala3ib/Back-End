@@ -1,5 +1,4 @@
 using Mala3ib.DAL.Abstraction.Const;
-using System.Threading.Tasks;
 
 namespace Mala3ib.API.Controllers
 {
@@ -69,28 +68,6 @@ namespace Mala3ib.API.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             var result = await _fieldService.UpdateAsync(id, request, userId!, cancellation);
-
-            return result.IsSuccess ? NoContent() : result.ToProblem();
-        }
-
-        [Authorize(Roles = DefaultRoles.FieldOwner)]
-        [HttpPost("{fieldId}/upload-images")]
-        public async Task<IActionResult> UploadImages([FromRoute] int fieldId, [FromForm] UploadFieldImagesRequest request, CancellationToken cancellation)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var result = await _fieldService.UploadImagesAsync(fieldId, userId!, request.Images, cancellation);
-
-            return result.IsSuccess ? NoContent() : result.ToProblem();
-        }
-
-        [Authorize(Roles = DefaultRoles.FieldOwner)]
-        [HttpDelete("{fieldId}/delete-image/{imageId}")]
-        public async Task<IActionResult> DeleteImage([FromRoute] int fieldId,[FromRoute] int imageId, CancellationToken cancellation)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var result = await _fieldService.DeleteImageAsync(fieldId, userId!, imageId , cancellation);
 
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }

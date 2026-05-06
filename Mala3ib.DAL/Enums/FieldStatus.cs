@@ -1,6 +1,6 @@
 namespace Mala3ib.DAL.Enums
 {
-    public enum Status
+    public enum FieldStatus
     {
         Pending,
         Approved,
