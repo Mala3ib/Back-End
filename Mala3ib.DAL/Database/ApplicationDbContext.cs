@@ -14,6 +14,7 @@ namespace Mala3ib.DAL.Database
         public DbSet<FieldSlotPlayer> FieldSlotPlayers { get; set; }
         public DbSet<FieldReview> FieldReviews { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
         public DbSet<EmailVerficationOtp> EmailVerficationOtps { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -1,4 +1,4 @@
-﻿namespace Mala3ib.DAL.Repo.Abstraction
+namespace Mala3ib.DAL.Repo.Abstraction
 {
     public interface IFieldOwnerRepo
     {
@@ -7,6 +7,8 @@
         Task DeleteAsync(string userId, CancellationToken cancellation = default);
         Task UpdateAsync(string userId, FieldOwner request, CancellationToken cancellation = default);
         IQueryable<FieldOwner> GetOwnerByUserId(string userId);
-        Task<bool> IsExistAsync(string userId, CancellationToken cancellation = default);
+        IQueryable<FieldOwner> GetAll(FieldStatus? status = null);
+        Task UpdateStatusAsync(string userId, FieldStatus status, CancellationToken cancellation = default);
+        Task<bool> FieleOwnerIsExist(string userId, CancellationToken cancellation = default);
     }
 }
