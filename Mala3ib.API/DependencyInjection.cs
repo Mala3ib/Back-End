@@ -41,6 +41,7 @@ namespace Mala3ib.API
             services.AddScoped<IFollowRepo, FollowRepo>();
             services.AddScoped<IFieldReviewRepo, FieldReviewRepo>();
             services.AddScoped<IInvitationRepo, InvitationRepo>();
+            services.AddScoped<IBookingRepo, BookingRepo>();
             #endregion
 
             #region Service
@@ -51,6 +52,9 @@ namespace Mala3ib.API
             services.AddScoped<IFieldSlotService, FieldSlotService>();
             services.AddScoped<IFieldReviewService, FieldReviewService>();
             services.AddScoped<IInvitationService, InvitationService>();
+            services.AddScoped<IBookingService, BookingService>();
+            services.AddScoped<IAdminService, AdminService>();
+            services.AddScoped<IFieldOwnerPortalService, FieldOwnerPortalService>();
             #endregion
 
             services.AddHttpContextAccessor();

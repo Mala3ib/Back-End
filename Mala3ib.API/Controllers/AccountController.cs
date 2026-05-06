@@ -22,7 +22,7 @@
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
 
-        [Authorize]
+        [Authorize(Roles = DefaultRoles.FieldOwner)]
         [HttpGet("field-owner")]
         public async Task<IActionResult> GetOwner()
         {
