@@ -6,7 +6,6 @@ namespace Mala3ib.DAL.Entities
         public string Name { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
         public decimal PricePerHour { get; set; }
-        public Status Status { get; set; }  
         public bool IsDeleted { get; set; } = false;
         public int FieldOwnerId { get; set; }
         public FieldOwner FieldOwner { get; set; } = default!;

@@ -5,7 +5,6 @@
         string FirstName,
         string LastName,
         string PhoneNumber, 
-        string? Image,
         DateOnly DateOfBirth,
         int FollowersCount,
         int FollowingCount,

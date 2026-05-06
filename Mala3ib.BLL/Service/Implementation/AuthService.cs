@@ -1,4 +1,5 @@
-﻿
+﻿using Mala3ib.DAL.Abstraction.Const;
+
 namespace Mala3ib.BLL.Service.Implementation
 {
     public class AuthService : IAuthService
@@ -22,15 +23,13 @@ namespace Mala3ib.BLL.Service.Implementation
             _playerRepo = playerRepo;
             _fieldOwnerRepo = fieldOwnerRepo;
         }
+
         public async Task<Result<AuthResponseDto>?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
         {
             var user = await _userManager.FindByEmailAsync(email);
 
-            if (user is null)
+            if (user is null || user.IsDeleted)
                 return Result.Failure<AuthResponseDto>(UserErrors.InvalidCredentials);
-
-            if(user.IsDeleted)
-                return Result.Failure<AuthResponseDto>(UserErrors.NotFouond);
 
             if (!user.EmailConfirmed)
                 return Result.Failure<AuthResponseDto>(UserErrors.EmailNotConfirmed);
@@ -41,19 +40,6 @@ namespace Mala3ib.BLL.Service.Implementation
                 return Result.Failure<AuthResponseDto>(UserErrors.InvalidCredentials);
 
             var userRoles = await _userManager.GetRolesAsync(user);
-
-            if (userRoles.Contains(DefaultRoles.FieldOwner))
-            {
-                var fieldOwnerStatus = _fieldOwnerRepo.GetOwnerByUserId(user.Id)
-                    .Select(x => x.Status)
-                    .FirstOrDefault();
-
-                if (fieldOwnerStatus == Status.Pending)
-                    return Result.Failure<AuthResponseDto>(UserErrors.FieldOwnerPending);
-
-                else if (fieldOwnerStatus == Status.Rejected)
-                    return Result.Failure<AuthResponseDto>(UserErrors.FieldOwnerRejected);
-            }
 
             var (token, expiresIn) = _jwtProvider.GenerateToken(user, userRoles);
 
@@ -67,7 +53,7 @@ namespace Mala3ib.BLL.Service.Implementation
             });
             await _userManager.UpdateAsync(user);
 
-            return Result.Success(new AuthResponseDto(user.Id, user.Email, user.FirstName, user.LastName, token, userRoles.FirstOrDefault()!, expiresIn, refreshToken, refreshTokenExpiration));
+            return Result.Success(new AuthResponseDto(user.Id, user.Email, user.FirstName, user.LastName, token, expiresIn, refreshToken, refreshTokenExpiration));
         }
 
         public async Task<Result<AuthResponseDto>?> GetRefreshTokenAsync(string token, string refreshToken, CancellationToken cancellationToken = default)
@@ -98,7 +84,7 @@ namespace Mala3ib.BLL.Service.Implementation
             });
             await _userManager.UpdateAsync(user);
 
-            var result = new AuthResponseDto(user.Id, user.Email, user.FirstName, user.LastName, newToken, userRoles.FirstOrDefault()!, expiresIn, newRefreshToken, refreshTokenExpiration);
+            var result = new AuthResponseDto(user.Id, user.Email, user.FirstName, user.LastName, newToken, expiresIn, newRefreshToken, refreshTokenExpiration);
             return Result.Success(result);
         }
 
@@ -136,6 +122,8 @@ namespace Mala3ib.BLL.Service.Implementation
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 PhoneNumber = request.PhoneNumber,
+                // set image 
+                Image = request.Image
             };
 
             var result = await _userManager.CreateAsync(user, request.Password);
@@ -161,6 +149,7 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, ErrorType.BadRequest));
         }
 
+
         public async Task<Result<RegisterReponseDto>> RegisterFieldOwnerAsync(RegisterFieldOwnerDto request, CancellationToken cancellationToken = default)
         {
             var emailIsExists = await _userManager.Users.AnyAsync(e => e.Email == request.Email, cancellationToken);
@@ -184,8 +173,9 @@ namespace Mala3ib.BLL.Service.Implementation
                 var fieldOwner = new FieldOwner
                 {
                     UserId = user.Id,
+                    Image = request.Image,
                     DateOfBirth = request.DateOfBirth,
-                    Status = Status.Pending
+                    IsApproved = FieldStatus.Pending
                 };
 
                 await _fieldOwnerRepo.AddAsync(fieldOwner);
@@ -200,7 +190,6 @@ namespace Mala3ib.BLL.Service.Implementation
             var error = result.Errors.First();
             return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, ErrorType.BadRequest));
         }
-
         public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequestDto request)
         {
             var user = await _userManager.FindByIdAsync(request.UserId);
@@ -284,5 +273,6 @@ namespace Mala3ib.BLL.Service.Implementation
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
         }
+
     }
 }

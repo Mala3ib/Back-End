@@ -40,7 +40,7 @@
             return fieldOwner;
         }
 
-        public async Task<bool> IsExistAsync(string userId, CancellationToken cancellation = default)
+        public async Task<bool> FieleOwnerIsExist(string userId, CancellationToken cancellation = default)
         {
             return await _context.FieldOwners
                .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
@@ -52,6 +52,7 @@
                 .Where(p => p.UserId == userId)
                 .ExecuteUpdateAsync(setter =>
                     setter.SetProperty(x => x.DateOfBirth, request.DateOfBirth)
+                    .SetProperty(x => x.IsApproved, request.IsApproved)
                 );
 
             await _context.Users

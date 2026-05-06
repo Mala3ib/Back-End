@@ -13,9 +13,6 @@ namespace Mala3ib.DAL.Database.EntitiesConfigurations
 
             builder.Property(x => x.PricePerHour)
                 .HasPrecision(10, 2);
-
-            builder.Property(x => x.Status)
-                .HasConversion<string>();
         }
     }
 }

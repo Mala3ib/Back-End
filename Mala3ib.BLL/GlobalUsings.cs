@@ -25,11 +25,6 @@ global using Mala3ib.DAL.Repo.Abstraction;
 global using Mala3ib.BLL.Contracts.FieldReview;
 global using Mapster;
 global using Mala3ib.BLL.Contracts.Common;
-global using Mala3ib.BLL.Validations.Common;
 global using Mala3ib.BLL.Contracts.Field;
 global using System.Linq.Dynamic.Core;
 global using Mala3ib.BLL.Errors;
-global using Mala3ib.DAL.Abstraction.Const;
-global using Microsoft.AspNetCore.Http;
-global using Microsoft.AspNetCore.Hosting;
-

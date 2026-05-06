@@ -5,7 +5,6 @@ namespace Mala3ib.BLL.Contracts.Field
         string Name,
         string Location,
         decimal PricePerHour,
-        float Rating,
-        List<GetFieldImages> Images
+        float Rating
     );
 }
