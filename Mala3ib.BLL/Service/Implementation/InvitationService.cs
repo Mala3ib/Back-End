@@ -15,8 +15,8 @@ namespace Mala3ib.BLL.Service.Implementation
         }
         private async Task<Result> HandleInvitationAsync(string currentUserId, int invitationId, InvitationStatus newStatus, CancellationToken cancellation)
         {
-            var invitation = _invitationRepo.GetById(invitationId).FirstOrDefault();
-            var currentPlayer = _playerRepo.Get(currentUserId).FirstOrDefault();
+            var invitation = await _invitationRepo.GetById(invitationId).FirstOrDefaultAsync();
+            var currentPlayer = await _playerRepo.Get(currentUserId).FirstOrDefaultAsync();
 
             if (invitation is null || invitation.IsDeleted)
                 return Result.Failure(InvitationErrors.NotFound);
@@ -35,7 +35,7 @@ namespace Mala3ib.BLL.Service.Implementation
         }
         public async Task<Result> SendAsync(string currentUserId, SendInviationDto request, CancellationToken cancellation = default)
         {
-            var fieldSlot = _fieldSlotRepo.GetById(request.FieldSlotId).FirstOrDefault();
+            var fieldSlot = await _fieldSlotRepo.GetById(request.FieldSlotId).FirstOrDefaultAsync();
             if (fieldSlot == null)
                 return Result.Failure(FieldSlotErrors.NotFound);
 
@@ -46,7 +46,7 @@ namespace Mala3ib.BLL.Service.Implementation
             var captain = fieldSlot.Players
                 .FirstOrDefault(p => p.IsCaptain)?.Player;
 
-            var currentPlayer = _playerRepo.Get(currentUserId).FirstOrDefault();
+            var currentPlayer = await _playerRepo.Get(currentUserId).FirstOrDefaultAsync();
             if (currentPlayer == null || captain == null || captain.Id != currentPlayer.Id)
                 return Result.Failure(InvitationErrors.Unauthorized);
 
@@ -73,7 +73,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> DeleteAsync(int id, string userId, CancellationToken cancellation = default)
         {
-            var player = _playerRepo.Get(userId).FirstOrDefault();
+            var player = await _playerRepo.Get(userId).FirstOrDefaultAsync();
             if (player == null)
                 return Result.Failure(InvitationErrors.Unauthorized);
 
@@ -95,13 +95,14 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result> RequestAsync(string currentUserId, int fieldSlotId, CancellationToken cancellation = default)
         {
-            var fieldSlot = _fieldSlotRepo.GetById(fieldSlotId).FirstOrDefault();
+            var fieldSlot = await _fieldSlotRepo.GetById(fieldSlotId).FirstOrDefaultAsync();
             if (fieldSlot == null)
                 return Result.Failure(FieldSlotErrors.NotFound);
 
             var captain = fieldSlot.Players
                 .FirstOrDefault(p => p.IsCaptain)?.Player;
-            var currentPlayer = _playerRepo.Get(currentUserId).FirstOrDefault();
+
+            var currentPlayer = await _playerRepo.Get(currentUserId).FirstOrDefaultAsync();
 
             if (currentPlayer == null || captain == null)
                 return Result.Failure(InvitationErrors.Unauthorized);
@@ -122,7 +123,7 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result<IEnumerable<InvitationResponseDto>>> GetSentInvitations(string currentUserId, InvitationStatus status, CancellationToken cancellation = default)
         {
-            var player = _playerRepo.Get(currentUserId).FirstOrDefault();
+            var player = await _playerRepo.Get(currentUserId).FirstOrDefaultAsync();
             if (player == null)
                 return Result.Failure<IEnumerable<InvitationResponseDto>>(PlayerErrors.NotFound);
 

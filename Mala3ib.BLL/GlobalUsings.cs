@@ -32,4 +32,5 @@ global using Mala3ib.BLL.Errors;
 global using Mala3ib.DAL.Abstraction.Const;
 global using Microsoft.AspNetCore.Http;
 global using Microsoft.AspNetCore.Hosting;
+global using Mala3ib.BLL.Contracts.FieldSlot;
 

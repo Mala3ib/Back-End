@@ -1,4 +1,6 @@
 using Mala3ib.BLL.Abstraction;
+using Microsoft.Build.Framework;
+using Microsoft.Extensions.Logging;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace Mala3ib.BLL.Service.Implementation
@@ -8,11 +10,13 @@ namespace Mala3ib.BLL.Service.Implementation
         private readonly IFieldRepo _fieldRepo;
         private readonly IFieldOwnerRepo _fieldOwnerRepo;
         private readonly IWebHostEnvironment _webHostEnvironment;
-        public FieldService(IFieldRepo fieldRepo, IFieldOwnerRepo fieldOwnerRepo, IWebHostEnvironment webHostEnvironment)
+        private readonly ILogger<FieldService> _logger;
+        public FieldService(IFieldRepo fieldRepo, IFieldOwnerRepo fieldOwnerRepo, IWebHostEnvironment webHostEnvironment, ILogger<FieldService> logger)
         {
             _fieldRepo = fieldRepo;
             _fieldOwnerRepo = fieldOwnerRepo;
             _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
         }
 
         public async Task<Result<FieldResponseDto>> AddAsync(AddFieldRequestDto request, string userId, CancellationToken cancellation = default)
@@ -261,23 +265,28 @@ namespace Mala3ib.BLL.Service.Implementation
 
         private async Task<FieldImage> SaveFieldImages(IFormFile image, int fieldId, CancellationToken cancellation = default)
         {
-            var _imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+            var imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+
+            if (!Directory.Exists(imagesPath))
+            {
+                Directory.CreateDirectory(imagesPath);
+            }
 
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
+            var path = Path.Combine(imagesPath, fileName);
 
-            var path = Path.Combine(_imagesPath, fileName);
+            var root = _webHostEnvironment.WebRootPath;
+            _logger.LogInformation("WebRootPath = {path}", root);
 
-            using var stream = File.Create(path);
+            using var stream = new FileStream(path, FileMode.Create);
 
             await image.CopyToAsync(stream, cancellation);
 
-            var fieldImage = new FieldImage
+            return new FieldImage
             {
                 ImageURL = $"images/{fileName}",
                 FieldId = fieldId
             };
-
-            return fieldImage;
         }
         private async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation)
         {

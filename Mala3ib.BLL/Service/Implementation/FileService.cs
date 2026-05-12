@@ -14,6 +14,11 @@
         {
             var _imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images");
 
+            if (!Directory.Exists(_imagesPath))
+            {
+                Directory.CreateDirectory(_imagesPath);
+            }
+
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
 
             var path = Path.Combine(_imagesPath, fileName);

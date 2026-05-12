@@ -1,5 +1,4 @@
-﻿
-namespace Mala3ib.BLL.Service.Implementation
+﻿namespace Mala3ib.BLL.Service.Implementation
 {
     public class AuthService : IAuthService
     {
@@ -44,15 +43,15 @@ namespace Mala3ib.BLL.Service.Implementation
 
             if (userRoles.Contains(DefaultRoles.FieldOwner))
             {
-                var fieldOwnerStatus = _fieldOwnerRepo.GetOwnerByUserId(user.Id)
-                    .Select(x => x.Status)
-                    .FirstOrDefault();
+                //var fieldOwnerStatus = _fieldOwnerRepo.GetOwnerByUserId(user.Id)
+                //    .Select(x => x.Status)
+                //    .FirstOrDefault();
 
-                if (fieldOwnerStatus == Status.Pending)
-                    return Result.Failure<AuthResponseDto>(UserErrors.FieldOwnerPending);
+                //if (fieldOwnerStatus == Status.Pending)
+                //    return Result.Failure<AuthResponseDto>(UserErrors.FieldOwnerPending);
 
-                else if (fieldOwnerStatus == Status.Rejected)
-                    return Result.Failure<AuthResponseDto>(UserErrors.FieldOwnerRejected);
+                //else if (fieldOwnerStatus == Status.Rejected)
+                //    return Result.Failure<AuthResponseDto>(UserErrors.FieldOwnerRejected);
             }
 
             var (token, expiresIn) = _jwtProvider.GenerateToken(user, userRoles);

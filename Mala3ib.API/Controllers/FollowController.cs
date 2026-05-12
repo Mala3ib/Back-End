@@ -47,13 +47,5 @@
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
-        
-        [HttpPost("follow/{email}")]
-        public async Task<IActionResult> FollowUserByEmail([FromRoute] string email, CancellationToken cancellationToken)
-        {
-            // implementation 
-            await Task.CompletedTask;
-            return NoContent();
-        }
     }
 }

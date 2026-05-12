@@ -35,8 +35,9 @@ namespace Mala3ib.DAL.Repo.Implementation
         public IQueryable<FieldSlot> GetByFieldId(int fieldId)
         {
             var fieldSlot = _context.FieldSlots
-                .Where(x => x.FieldId == fieldId && !x.IsDeleted)
-                .AsNoTracking();
+                .AsNoTracking()
+                .Where(x => x.FieldId == fieldId && !x.IsDeleted);
+                
 
             return fieldSlot;
         }

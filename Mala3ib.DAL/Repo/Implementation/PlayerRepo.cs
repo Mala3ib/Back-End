@@ -25,6 +25,14 @@
             return player;
         }
 
+        public IQueryable<Player> GetAll()
+        {
+            var player = _context.Players
+                .AsNoTracking();
+
+            return player;
+        }
+
         public async Task<bool> IsExistAsync(int Id, CancellationToken cancellation = default)
         {
             return await _context.Players

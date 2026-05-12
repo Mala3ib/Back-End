@@ -1,5 +1,3 @@
-using Mala3ib.BLL.Contracts.FieldSlot;
-
 namespace Mala3ib.BLL.Service.Implementation
 {
     public class FieldSlotService : IFieldSlotService
@@ -15,19 +13,6 @@ namespace Mala3ib.BLL.Service.Implementation
         }
         private async Task<Result> ValidateOwnerAsync(string userId, int fieldId, CancellationToken cancellation)
         {
-            //var owner = await _fieldOwnerRepo.GetOwnerByUserId(userId)
-            //    .FirstOrDefaultAsync(cancellation);
-
-            //var field = await _fieldRepo.GetById(fieldId)
-            //    .FirstOrDefaultAsync(cancellation);
-
-            //if (owner is null || field is null)
-            //    return Result.Failure(FieldSlotErrors.NotFound);
-
-            //if (owner.Id != field.FieldOwnerId)
-            //    return Result.Failure(FieldSlotErrors.Unauthorized);
-
-
             var isValid = await _fieldRepo
                     .GetAll() 
                     .AnyAsync(f => f.Id == fieldId && f.FieldOwner.UserId == userId && !f.IsDeleted && !f.FieldOwner.IsDeleted, cancellation);
@@ -126,15 +111,14 @@ namespace Mala3ib.BLL.Service.Implementation
         {
             var actualDate = date ?? DateTime.Today;
 
-            int invitedPlayers = 0; //
-
             var fieldSlots = await _fieldSlotRepo.GetAvailableSlots(fieldId, actualDate)
                 .Select(f => new FieldSlotResponseDto(
+                    f.Id,
                     f.StartDate,
                     f.EndDate,
                     f.Price,
                     f.MaxPlayers,
-                    invitedPlayers,  // Will be changed after implement Invitaion Table
+                    f.Players.Count(),  // Will be changed after implement Invitaion Table
                     f.IsBooked
                 )).ToListAsync(cancellation);
 
@@ -143,15 +127,14 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result<IEnumerable<FieldSlotResponseDto>>> GetByFieldIdAsync(int fieldId, CancellationToken cancellation = default)
         {
-            int invitedPlayers = 0; //
-
             var fieldSlots = await _fieldSlotRepo.GetByFieldId(fieldId)
                 .Select(f => new FieldSlotResponseDto(
+                    f.Id,
                     f.StartDate,
                     f.EndDate,
                     f.Price,
                     f.MaxPlayers,
-                    invitedPlayers,  // Will be changed after implement Invitaion Table
+                    f.Players.Count(),  // Will be changed after implement Invitaion Table
                     f.IsBooked
                 )).ToListAsync(cancellation);
 
@@ -160,15 +143,14 @@ namespace Mala3ib.BLL.Service.Implementation
 
         public async Task<Result<FieldSlotResponseDto>> GetByIdAsync(int id, CancellationToken cancellation = default)
         {
-            int invitedPlayers = 0; //
-
             var fieldSlot = await _fieldSlotRepo.GetById(id)
                 .Select(f => new FieldSlotResponseDto(
+                    f.Id,
                     f.StartDate,
                     f.EndDate,
                     f.Price,
                     f.MaxPlayers,
-                    invitedPlayers,  // Will be changed after implement Invitaion Table
+                    f.Players.Count(),  // Will be changed after implement Invitaion Table
                     f.IsBooked
                 )).FirstOrDefaultAsync(cancellation);
 
