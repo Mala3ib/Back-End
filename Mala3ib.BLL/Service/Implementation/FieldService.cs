@@ -1,4 +1,7 @@
 using Mala3ib.BLL.Abstraction;
+using Microsoft.Build.Framework;
+using Microsoft.Extensions.Logging;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Mala3ib.BLL.Service.Implementation
 {
@@ -6,15 +9,23 @@ namespace Mala3ib.BLL.Service.Implementation
     {
         private readonly IFieldRepo _fieldRepo;
         private readonly IFieldOwnerRepo _fieldOwnerRepo;
-        public FieldService(IFieldRepo fieldRepo, IFieldOwnerRepo fieldOwnerRepo)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ILogger<FieldService> _logger;
+        public FieldService(IFieldRepo fieldRepo, IFieldOwnerRepo fieldOwnerRepo, IWebHostEnvironment webHostEnvironment, ILogger<FieldService> logger)
         {
             _fieldRepo = fieldRepo;
             _fieldOwnerRepo = fieldOwnerRepo;
+            _webHostEnvironment = webHostEnvironment;
+            _logger = logger;
         }
 
         public async Task<Result<FieldResponseDto>> AddAsync(AddFieldRequestDto request, string userId, CancellationToken cancellation = default)
         {
             var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
+
+            if (ownerId.IsFailure)
+                return Result.Failure<FieldResponseDto>(ownerId.Error);
+
             var field = new Field
             {
                 Name = request.Name,
@@ -29,8 +40,6 @@ namespace Mala3ib.BLL.Service.Implementation
 
             return Result.Success(fieldResponse!);
         }
-
-        
 
         public async Task<Result<PaginatedList<FieldResponseDto>>> GetAllAsync(RequestFilter filter,  CancellationToken cancellation = default)
         {
@@ -49,8 +58,12 @@ namespace Mala3ib.BLL.Service.Implementation
                     f.Location,
                     f.PricePerHour,
                     Rating = f.Reviews
+                        .Where(x => !x.IsDeleted)
                         .Select(r => (float?)r.Rating)
-                        .Average() ?? 0
+                        .Average() ?? 0,
+                    Images = f.Images
+                        .Where(x => !x.IsDeleted)
+                        .Select(x => new GetFieldImages(x.Id, x.ImageURL))
                 });
 
             var sortColumnKey = string.IsNullOrWhiteSpace(filter.SortColumn)
@@ -83,7 +96,8 @@ namespace Mala3ib.BLL.Service.Implementation
                     f.Name,
                     f.Location,
                     f.PricePerHour,
-                    f.Rating
+                    f.Rating,
+                    f.Images.ToList()
                 ));
             var fields = await PaginatedList<FieldResponseDto>.CreateAsync(source, filter.PageNumber, filter.PageSize);
 
@@ -98,7 +112,10 @@ namespace Mala3ib.BLL.Service.Implementation
                     f.Name,
                     f.Location,
                     f.PricePerHour,
-                    f.Reviews.Select(r => (float?)r.Rating).Average() ?? 0
+                    f.Reviews.Where(x => !x.IsDeleted).Select(r => (float?)r.Rating).Average() ?? 0,
+                    f.Images
+                        .Where(x => !x.IsDeleted)
+                        .Select(x => new GetFieldImages(x.Id, x.ImageURL)).ToList()
                 )).FirstOrDefaultAsync(cancellation);
 
             if (field is null)
@@ -120,13 +137,15 @@ namespace Mala3ib.BLL.Service.Implementation
                     f.Name,
                     f.Location,
                     f.PricePerHour,
-                    f.Reviews.Select(r => (float?)r.Rating).Average() ?? 0
+                    f.Reviews.Where(x => !x.IsDeleted).Select(r => (float?)r.Rating).Average() ?? 0,
+                    f.Images
+                        .Where(x => !x.IsDeleted)
+                        .Select(x => new GetFieldImages(x.Id, x.ImageURL)).ToList()
                 )).ToListAsync(cancellation);
 
 
             return Result.Success<IEnumerable<FieldResponseDto>>(fields);
-        }
-      
+        }      
 
         public async Task<Result> UpdateAsync(int id, UpdateFieldRequestDto request, string userId, CancellationToken cancellation = default)
         {
@@ -137,6 +156,9 @@ namespace Mala3ib.BLL.Service.Implementation
                 return Result.Failure(FieldErrors.NotFound);
 
             var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
+
+            if (ownerId.IsFailure)
+                return Result.Failure<FieldResponseDto>(ownerId.Error);
 
             if (oldField.FieldOwnerId != ownerId.Value)
                 return Result.Failure(FieldErrors.Unauthorized);
@@ -163,12 +185,108 @@ namespace Mala3ib.BLL.Service.Implementation
 
             var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
 
+            if (ownerId.IsFailure)
+                return Result.Failure<FieldResponseDto>(ownerId.Error);
+
             if (field.FieldOwnerId != ownerId.Value)
                 return Result.Failure(FieldErrors.Unauthorized);
 
             await _fieldRepo.DeleteAsync(id, cancellation);
 
             return Result.Success();
+        }
+
+        public async Task<Result> UploadImagesAsync(int id, string userId,  IFormFileCollection images, CancellationToken cancellation = default)
+        {
+            var field = await _fieldRepo.GetById(id)
+                .FirstOrDefaultAsync(cancellation);
+
+            if (field is null)
+                return Result.Failure(FieldErrors.NotFound);
+
+            var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
+
+            if (ownerId.IsFailure)
+                return Result.Failure(ownerId.Error);
+
+            if (field.FieldOwnerId != ownerId.Value)
+                return Result.Failure(FieldErrors.Unauthorized);
+
+            var fieldImagesCount = await _fieldRepo.GetFieldImagesCountAsync(id, cancellation);
+
+            if(images.Count() + fieldImagesCount > 3) 
+                return Result.Failure(FieldErrors.FieldImagesLimit);
+
+            List<FieldImage> fieldImages = [];
+
+            foreach(var image in images)
+            {
+                var fildImage = await SaveFieldImages(image, id, cancellation);
+                fieldImages.Add(fildImage);
+            }
+
+            await _fieldRepo.UploadImageAsync(fieldImages, cancellation);
+            return Result.Success();
+        }
+
+        public async Task<Result> DeleteImageAsync(int fieldId, string userId, int imageId, CancellationToken cancellation)
+        {
+            var field = await _fieldRepo.GetById(fieldId)
+                .FirstOrDefaultAsync(cancellation);
+
+            if (field is null)
+                return Result.Failure(FieldErrors.NotFound);
+
+            var ownerId = await GetOwnerIdByUserIdAsync(userId, cancellation);
+
+            if (ownerId.IsFailure)
+                return Result.Failure(ownerId.Error);
+
+            if (field.FieldOwnerId != ownerId.Value)
+                return Result.Failure(FieldErrors.Unauthorized);
+
+            var fieldImage = await _fieldRepo.GetImageAsync(imageId, cancellation);
+
+            if (fieldImage is null)
+                return Result.Failure(FieldErrors.FieldImagesNotFount);
+
+            if (fieldImage.FieldId != fieldId)
+                return Result.Failure(FieldErrors.Unauthorized);
+
+            var fullPath = Path.Combine(_webHostEnvironment.WebRootPath, fieldImage.ImageURL);
+
+            if (File.Exists(fullPath))
+                File.Delete(fullPath);
+
+            await _fieldRepo.DeleteImageAsync(fieldId ,imageId, cancellation);
+
+            return Result.Success();
+        }
+
+        private async Task<FieldImage> SaveFieldImages(IFormFile image, int fieldId, CancellationToken cancellation = default)
+        {
+            var imagesPath = Path.Combine(_webHostEnvironment.WebRootPath, "images");
+
+            if (!Directory.Exists(imagesPath))
+            {
+                Directory.CreateDirectory(imagesPath);
+            }
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(image.FileName)}";
+            var path = Path.Combine(imagesPath, fileName);
+
+            var root = _webHostEnvironment.WebRootPath;
+            _logger.LogInformation("WebRootPath = {path}", root);
+
+            using var stream = new FileStream(path, FileMode.Create);
+
+            await image.CopyToAsync(stream, cancellation);
+
+            return new FieldImage
+            {
+                ImageURL = $"images/{fileName}",
+                FieldId = fieldId
+            };
         }
         private async Task<Result<int>> GetOwnerIdByUserIdAsync(string userId, CancellationToken cancellation)
         {

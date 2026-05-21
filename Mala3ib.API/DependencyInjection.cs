@@ -1,6 +1,4 @@
-﻿using Mala3ib.DAL.Entities;
-
-namespace Mala3ib.API
+﻿namespace Mala3ib.API
 {
     public static class DependencyInjection
     {
@@ -41,7 +39,6 @@ namespace Mala3ib.API
             services.AddScoped<IFollowRepo, FollowRepo>();
             services.AddScoped<IFieldReviewRepo, FieldReviewRepo>();
             services.AddScoped<IInvitationRepo, InvitationRepo>();
-            services.AddScoped<IBookingRepo, BookingRepo>();
             #endregion
 
             #region Service
@@ -51,10 +48,8 @@ namespace Mala3ib.API
             services.AddScoped<IFieldOwnerService, FieldOwnerService>();
             services.AddScoped<IFieldSlotService, FieldSlotService>();
             services.AddScoped<IFieldReviewService, FieldReviewService>();
+            services.AddScoped<IFileService, FileService>();
             services.AddScoped<IInvitationService, InvitationService>();
-            services.AddScoped<IBookingService, BookingService>();
-            services.AddScoped<IAdminService, AdminService>();
-            services.AddScoped<IFieldOwnerPortalService, FieldOwnerPortalService>();
             #endregion
 
             services.AddHttpContextAccessor();

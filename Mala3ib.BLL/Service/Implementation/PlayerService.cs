@@ -4,25 +4,24 @@ namespace Mala3ib.BLL.Service.Implementation
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepo _playerRepo;
-        private readonly IFollowRepo _followRepo;
         private readonly UserManager<ApplicationUser> _userManager;
         public PlayerService(IPlayerRepo playerRepo,
-            UserManager<ApplicationUser> userManager,
-            IFollowRepo followRepo)
+            UserManager<ApplicationUser> userManager)
         {
             _playerRepo = playerRepo;
             _userManager = userManager;
-            _followRepo = followRepo;
         }
 
         public async Task<Result<PlayerProfileDto>> GetAsync(string currentUserId, string userId, CancellationToken cancellation = default)
         {
             var player = await _playerRepo.Get(userId)
                 .Select(p => new PlayerProfileDto(
+                    p.User.Id,
                     p.User.Email!,
                     p.User.FirstName,
                     p.User.LastName,
                     p.User.PhoneNumber!,
+                    p.User.Image,
                     p.DateOfBirth,
                     p.User.Followers.Count(x => !x.IsDeleted),
                     p.User.Following.Count(x => !x.IsDeleted),
@@ -83,6 +82,31 @@ namespace Mala3ib.BLL.Service.Implementation
             await _playerRepo.DeleteAsync(userId, cancellation);
 
             return Result.Success();
+        }
+
+        public async Task<PaginatedList<PlayerInfoDto>> GetAllAsync(RequestFilter filter, CancellationToken cancellationToken = default)
+        {
+            var query = _playerRepo.GetAll();
+
+            if (!string.IsNullOrEmpty(filter.SearchValue))
+            {
+                query = query.Where(x =>
+                    (x.User.FirstName + " " + x.User.LastName).Contains(filter.SearchValue) ||
+                    x.User.Email!.Contains(filter.SearchValue));
+            }
+
+            query = query.OrderBy(x => x.User.Id);
+
+            var source = query.Select(x => new PlayerInfoDto(
+                x.User.Id,
+                x.User.FirstName + " " + x.User.LastName,
+                x.User.Email!,
+                x.User.Image
+            ));
+
+            var players = await PaginatedList<PlayerInfoDto>.CreateAsync(source, filter.PageNumber, filter.PageSize, cancellationToken);
+
+            return players;
         }
 
     }

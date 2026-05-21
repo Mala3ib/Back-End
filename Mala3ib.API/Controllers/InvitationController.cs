@@ -5,7 +5,7 @@ namespace Mala3ib.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize(Roles = DefaultRoles.Player)]
+    [Authorize]
     public class InvitationController : ControllerBase
     {
         private readonly IInvitationService _invitationService;

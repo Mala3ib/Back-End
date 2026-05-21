@@ -6,6 +6,7 @@
         string FirstName,
         string LastName,
         string Token,
+        string Role,
         int ExpiresIn,
         string RefreshToken,   
         DateTime RefreshTokenExpiration 

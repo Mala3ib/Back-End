@@ -4,7 +4,8 @@
     {
         public void Configure(EntityTypeBuilder<FieldOwner> builder)
         {
-
+            builder.Property(x => x.IsApproved)
+                .HasConversion<string>();
         }
     }
 }

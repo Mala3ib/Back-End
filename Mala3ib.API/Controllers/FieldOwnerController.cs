@@ -1,44 +1,25 @@
-using Mala3ib.DAL.Enums;
-
-namespace Mala3ib.API.Controllers
+﻿namespace Mala3ib.API.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
-    [Authorize(Roles = DefaultRoles.FieldOwner)]
+    [ApiController]
+    [Authorize(Roles = $"{DefaultRoles.FieldOwner}")]
     public class FieldOwnerController : ControllerBase
     {
-        private readonly IFieldOwnerPortalService _fieldOwnerPortalService;
-
-        public FieldOwnerController(IFieldOwnerPortalService fieldOwnerPortalService)
+        private readonly IFieldOwnerService _fieldOwnerService;
+        public FieldOwnerController(IFieldOwnerService fieldOwnerService)
         {
-            _fieldOwnerPortalService = fieldOwnerPortalService;
+            _fieldOwnerService = fieldOwnerService;
         }
 
-        [HttpGet("fields")]
-        public async Task<IActionResult> GetMyFields([FromQuery] RequestFilter filter, CancellationToken cancellation)
+        [HttpGet("dashboard")]
+        public async Task<IActionResult> GetDashboard(CancellationToken cancellationToken)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _fieldOwnerPortalService.GetMyFieldsAsync(userId!, filter, cancellation);
+            var ownerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var result = await _fieldOwnerService.GetDashboardAsync(ownerId!, cancellationToken);
 
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
         }
 
-        [HttpGet("bookings")]
-        public async Task<IActionResult> GetMyBookings([FromQuery] RequestFilter filter, CancellationToken cancellation)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _fieldOwnerPortalService.GetMyBookingsAsync(userId!, filter, cancellation);
-
-            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-        }
-
-        [HttpGet("invitations")]
-        public async Task<IActionResult> GetMyInvitations([FromQuery] RequestFilter filter, [FromQuery] InvitationStatus? status, CancellationToken cancellation)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var result = await _fieldOwnerPortalService.GetMyInvitationsAsync(userId!, filter, status, cancellation);
-
-            return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
-        }
     }
 }

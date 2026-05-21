@@ -1,6 +1,6 @@
 using Mala3ib.BLL.Contracts.Booking;
-using Mala3ib.BLL.Contracts.Field;
 using Mala3ib.BLL.Contracts.Invitation;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Mala3ib.BLL.Service.Implementation
 {
@@ -31,7 +31,10 @@ namespace Mala3ib.BLL.Service.Implementation
                     f.Name,
                     f.Location,
                     f.PricePerHour,
-                    f.Reviews.Select(r => (float?)r.Rating).Average() ?? 0
+                    f.Reviews.Select(r => (float?)r.Rating).Average() ?? 0,
+                    f.Images
+                        .Where(x => !x.IsDeleted)
+                        .Select(x => new GetFieldImages(x.Id, x.ImageURL)).ToList()
                 ));
 
             var fields = await PaginatedList<FieldResponseDto>.CreateAsync(query, filter.PageNumber, filter.PageSize, cancellation);

@@ -63,7 +63,7 @@ namespace Mala3ib.API.Controllers
 
         [Authorize]
         [HttpGet("field/{fieldId}/avialable-slots")]
-        public async Task<IActionResult> GetAvialableSlots([FromRoute] int fieldId, [FromQuery] DateTime? date, CancellationToken cancellation)
+        public async Task<IActionResult> GetFieldSlots([FromRoute] int fieldId, [FromQuery] DateTime? date, CancellationToken cancellation)
         {
             var result = await _fieldSlotService.GetAvailableSlots(fieldId, date, cancellation);
 

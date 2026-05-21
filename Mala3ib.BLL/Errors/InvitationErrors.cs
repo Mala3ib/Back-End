@@ -21,8 +21,5 @@ namespace Mala3ib.BLL.Errors
         public static Error FieldSlotIsFull
             = new Error("Invitation.FieldSlotIsFull", "FieldSlot Is Full", ErrorType.BadRequest);
 
-        public static Error AlreadyInFieldSlot
-            = new Error("Invitation.AlreadyInFieldSlot", "Player already in this field slot", ErrorType.BadRequest);
-
     }
 }
