@@ -14,6 +14,40 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddPlayerToSlotAsync(int fieldSlotId, int playerId, bool isCaptain = false, CancellationToken cancellation = default)
+        {
+            var fieldSlotPlayer = new FieldSlotPlayer
+            {
+                FieldSlotId = fieldSlotId,
+                PlayerId = playerId,
+                IsCaptain = isCaptain
+            };
+
+            await _context.FieldSlotPlayers.AddAsync(fieldSlotPlayer, cancellation);
+            await _context.SaveChangesAsync(cancellation);
+        }
+
+        public async Task<bool> IsPlayerInSlotAsync(int fieldSlotId, int playerId, CancellationToken cancellation = default)
+        {
+            return await _context.FieldSlotPlayers
+                .AnyAsync(x => x.FieldSlotId == fieldSlotId && x.PlayerId == playerId, cancellation);
+        }
+
+        public async Task ClearPlayersFromSlotAsync(int fieldSlotId, CancellationToken cancellation = default)
+        {
+            await _context.FieldSlotPlayers
+                .Where(x => x.FieldSlotId == fieldSlotId)
+                .ExecuteDeleteAsync(cancellation);
+        }
+
+        public async Task UpdateBookedStatusAsync(int fieldSlotId, bool isBooked, CancellationToken cancellation = default)
+        {
+            await _context.FieldSlots
+                .Where(x => x.Id == fieldSlotId && !x.IsDeleted)
+                .ExecuteUpdateAsync(setter =>
+                    setter.SetProperty(x => x.IsBooked, isBooked), cancellation);
+        }
+
         public IQueryable<FieldSlot> GetAvailableSlots(int fieldId, DateTime day)
         {
             var startOfDay = day.Date;
@@ -35,9 +69,8 @@ namespace Mala3ib.DAL.Repo.Implementation
         public IQueryable<FieldSlot> GetByFieldId(int fieldId)
         {
             var fieldSlot = _context.FieldSlots
-                .AsNoTracking()
-                .Where(x => x.FieldId == fieldId && !x.IsDeleted);
-                
+                .Where(x => x.FieldId == fieldId && !x.IsDeleted)
+                .AsNoTracking();
 
             return fieldSlot;
         }

@@ -40,7 +40,7 @@
             return fieldOwner;
         }
 
-        public async Task<bool> IsExistAsync(string userId, CancellationToken cancellation = default)
+        public async Task<bool> FieleOwnerIsExist(string userId, CancellationToken cancellation = default)
         {
             return await _context.FieldOwners
                .AnyAsync(p => p.UserId == userId && !p.IsDeleted, cancellation);
@@ -52,6 +52,7 @@
                 .Where(p => p.UserId == userId)
                 .ExecuteUpdateAsync(setter =>
                     setter.SetProperty(x => x.DateOfBirth, request.DateOfBirth)
+                    .SetProperty(x => x.IsApproved, request.IsApproved)
                 );
 
             await _context.Users
@@ -65,6 +66,26 @@
         public IQueryable<FieldOwner> GetOwnerByUserId(string userId)
         {
             return _context.FieldOwners.Where(o => o.UserId == userId);
+        }
+
+        public IQueryable<FieldOwner> GetAll(FieldStatus? status = null)
+        {
+            var query = _context.FieldOwners
+                .Where(x => !x.IsDeleted)
+                .AsNoTracking();
+
+            if (status is not null)
+                query = query.Where(x => x.IsApproved == status);
+
+            return query;
+        }
+
+        public async Task UpdateStatusAsync(string userId, FieldStatus status, CancellationToken cancellation = default)
+        {
+            await _context.FieldOwners
+                .Where(x => x.UserId == userId && !x.IsDeleted)
+                .ExecuteUpdateAsync(setter => setter
+                    .SetProperty(x => x.IsApproved, status), cancellation);
         }
     }
 }

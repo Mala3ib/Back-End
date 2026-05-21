@@ -184,7 +184,7 @@
                 {
                     UserId = user.Id,
                     DateOfBirth = request.DateOfBirth,
-                    Status = Status.Pending
+                    IsApproved = FieldStatus.Pending
                 };
 
                 await _fieldOwnerRepo.AddAsync(fieldOwner);

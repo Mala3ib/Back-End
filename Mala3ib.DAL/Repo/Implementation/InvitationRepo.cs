@@ -20,6 +20,7 @@ namespace Mala3ib.DAL.Repo.Implementation
                 invitation.IsDeleted = false;
                 invitation.Status = InvitationStatus.Pending;
                 invitation.CreatedAt = DateTime.UtcNow;
+                invitation.Type = type;
 
                 await _context.SaveChangesAsync(cancellation);
                 return true;
@@ -38,6 +39,30 @@ namespace Mala3ib.DAL.Repo.Implementation
             await _context.SaveChangesAsync(cancellation);
 
             return true;
+        }
+
+        public IQueryable<Invitation> GetAll(InvitationStatus? status = null)
+        {
+            var query = _context.Invitations
+                .Where(x => !x.IsDeleted)
+                .AsNoTracking();
+
+            if (status is not null)
+                query = query.Where(x => x.Status == status);
+
+            return query;
+        }
+
+        public IQueryable<Invitation> GetByFieldOwnerId(int fieldOwnerId, InvitationStatus? status = null)
+        {
+            var query = _context.Invitations
+                .Where(x => !x.IsDeleted && x.FieldSlot.Field.FieldOwnerId == fieldOwnerId)
+                .AsNoTracking();
+
+            if (status is not null)
+                query = query.Where(x => x.Status == status);
+
+            return query;
         }
 
         public IQueryable<Invitation> GetById(int id)
@@ -74,6 +99,13 @@ namespace Mala3ib.DAL.Repo.Implementation
                 .ExecuteUpdateAsync(setter =>
                     setter.SetProperty(x => x.Status, invitation.Status), cancellation
                 );
+        }
+
+        public async Task DeletePendingByFieldSlotIdAsync(int fieldSlotId, CancellationToken cancellation = default)
+        {
+            await _context.Invitations
+                .Where(x => x.FieldSlotId == fieldSlotId && !x.IsDeleted && x.Status == InvitationStatus.Pending)
+                .ExecuteUpdateAsync(setter => setter.SetProperty(x => x.IsDeleted, true), cancellation);
         }
 
         public async Task DeleteAsync(int id, CancellationToken cancellation = default)
