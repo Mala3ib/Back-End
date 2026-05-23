@@ -1,19 +1,33 @@
 ﻿
+using Mala3ib.BLL.Abstraction;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Mala3ib.BLL.Service.Implementation
 {
     public class PlayerService : IPlayerService
     {
         private readonly IPlayerRepo _playerRepo;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICacheService _cacheService;
+
         public PlayerService(IPlayerRepo playerRepo,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            ICacheService cacheService)
         {
             _playerRepo = playerRepo;
             _userManager = userManager;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<PlayerProfileDto>> GetAsync(string currentUserId, string userId, CancellationToken cancellation = default)
         {
+            var cacheProfile = await _cacheService.GetAsync<PlayerProfileDto>(CacheKeys.ProfileKey(userId), cancellation);
+
+            if(cacheProfile is not null)
+            {
+                return Result.Success(cacheProfile);
+            }
+            
             var player = await _playerRepo.Get(userId)
                 .Select(p => new PlayerProfileDto(
                     p.User.Id,
@@ -32,12 +46,14 @@ namespace Mala3ib.BLL.Service.Implementation
             if (player is null)
                 return Result.Failure<PlayerProfileDto>(PlayerErrors.NotFound);
 
+            await _cacheService.SetAsync<PlayerProfileDto>(CacheKeys.ProfileKey(userId), player, cancellation);
+
             return Result.Success(player);
         }
 
         public async Task<Result> UpdateAsync(string userId, UpdatePlayerRequestDto request, CancellationToken cancellation = default)
         {
-            var oldPlayer = _playerRepo.Get(userId).FirstOrDefault();
+            var oldPlayer = await _playerRepo.Get(userId).FirstOrDefaultAsync(cancellation);
 
             if (oldPlayer == null)
                 return Result.Failure(PlayerErrors.NotFound);
@@ -53,7 +69,10 @@ namespace Mala3ib.BLL.Service.Implementation
                 }
             };
 
+            await _cacheService.RemoveAsync(CacheKeys.ProfileKey(userId), cancellation);
+            
             await _playerRepo.UpdateAsync(userId, player, cancellation);
+
             return Result.Success(player);
         }
 

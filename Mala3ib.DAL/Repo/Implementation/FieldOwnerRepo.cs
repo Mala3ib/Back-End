@@ -52,7 +52,7 @@
                 .Where(p => p.UserId == userId)
                 .ExecuteUpdateAsync(setter =>
                     setter.SetProperty(x => x.DateOfBirth, request.DateOfBirth)
-                    .SetProperty(x => x.IsApproved, request.IsApproved)
+                    .SetProperty(x => x.Status, request.Status)
                 );
 
             await _context.Users
@@ -68,24 +68,24 @@
             return _context.FieldOwners.Where(o => o.UserId == userId);
         }
 
-        public IQueryable<FieldOwner> GetAll(FieldStatus? status = null)
+        public IQueryable<FieldOwner> GetAll(Status? status = null)
         {
             var query = _context.FieldOwners
                 .Where(x => !x.IsDeleted)
                 .AsNoTracking();
 
             if (status is not null)
-                query = query.Where(x => x.IsApproved == status);
+                query = query.Where(x => x.Status == status);
 
             return query;
         }
 
-        public async Task UpdateStatusAsync(string userId, FieldStatus status, CancellationToken cancellation = default)
+        public async Task UpdateStatusAsync(string userId, Status status, CancellationToken cancellation = default)
         {
             await _context.FieldOwners
                 .Where(x => x.UserId == userId && !x.IsDeleted)
                 .ExecuteUpdateAsync(setter => setter
-                    .SetProperty(x => x.IsApproved, status), cancellation);
+                    .SetProperty(x => x.Status, status), cancellation);
         }
     }
 }

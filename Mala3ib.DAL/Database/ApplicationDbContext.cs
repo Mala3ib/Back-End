@@ -16,6 +16,7 @@ namespace Mala3ib.DAL.Database
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<EmailVerficationOtp> EmailVerficationOtps { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

@@ -49,7 +49,7 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success(invitations);
         }
 
-        public async Task<Result<PaginatedList<AdminFieldOwnerDto>>> GetFieldOwnersAsync(RequestFilter filter, FieldStatus? status = null, CancellationToken cancellation = default)
+        public async Task<Result<PaginatedList<AdminFieldOwnerDto>>> GetFieldOwnersAsync(RequestFilter filter, Status? status = null, CancellationToken cancellation = default)
         {
             var query = _fieldOwnerRepo.GetAll(status)
                 .Select(x => new AdminFieldOwnerDto(
@@ -60,7 +60,7 @@ namespace Mala3ib.BLL.Service.Implementation
                     x.User.LastName,
                     x.User.PhoneNumber,
                     x.DateOfBirth,
-                    x.IsApproved
+                    x.Status
                 ));
 
             var owners = await PaginatedList<AdminFieldOwnerDto>.CreateAsync(query, filter.PageNumber, filter.PageSize, cancellation);
@@ -68,7 +68,7 @@ namespace Mala3ib.BLL.Service.Implementation
             return Result.Success(owners);
         }
 
-        public async Task<Result> UpdateFieldOwnerStatusAsync(string ownerUserId, FieldStatus status, CancellationToken cancellation = default)
+        public async Task<Result> UpdateFieldOwnerStatusAsync(string ownerUserId, Status status, CancellationToken cancellation = default)
         {
             var exists = await _fieldOwnerRepo.FieleOwnerIsExist(ownerUserId, cancellation);
             if (!exists)

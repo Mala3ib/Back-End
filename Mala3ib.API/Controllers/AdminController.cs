@@ -30,7 +30,7 @@ namespace Mala3ib.API.Controllers
         }
 
         [HttpGet("field-owners")]
-        public async Task<IActionResult> GetFieldOwners([FromQuery] RequestFilter filter, [FromQuery] FieldStatus? status, CancellationToken cancellation)
+        public async Task<IActionResult> GetFieldOwners([FromQuery] RequestFilter filter, [FromQuery] Status? status, CancellationToken cancellation)
         {
             var result = await _adminService.GetFieldOwnersAsync(filter, status, cancellation);
             return result.IsSuccess ? Ok(result.Value) : result.ToProblem();
