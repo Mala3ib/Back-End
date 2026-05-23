@@ -1,4 +1,6 @@
-﻿namespace Mala3ib.BLL.Service.Implementation
+﻿using Microsoft.Extensions.Logging;
+
+namespace Mala3ib.BLL.Service.Implementation
 {
     public class AuthService : IAuthService
     {
@@ -7,19 +9,22 @@
         private readonly IEmailVerificationService _emailVerificationService;
         private readonly IPlayerRepo _playerRepo;
         private readonly IFieldOwnerRepo _fieldOwnerRepo;
+        private readonly ILogger<AuthService> _logger;
 
         private readonly int _refreshTokenExpiryDays = 14;
         public AuthService(IJwtProvider jwtProvider,
             UserManager<ApplicationUser> userManager,
             IEmailVerificationService emailVerificationService,
             IPlayerRepo playerRepo,
-            IFieldOwnerRepo fieldOwnerRepo)
+            IFieldOwnerRepo fieldOwnerRepo,
+            ILogger<AuthService> logger)
         {
             _jwtProvider = jwtProvider;
             _userManager = userManager;
             _emailVerificationService = emailVerificationService;
             _playerRepo = playerRepo;
             _fieldOwnerRepo = fieldOwnerRepo;
+            _logger = logger;
         }
         public async Task<Result<AuthResponseDto>?> GetTokenAsync(string email, string password, CancellationToken cancellationToken = default)
         {
@@ -157,7 +162,7 @@
             }
 
             var error = result.Errors.First();
-            return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, ErrorType.BadRequest));
+            return Result.Failure<RegisterReponseDto>(new DAL.Abstraction.Error(error.Code, error.Description, ErrorType.BadRequest));
         }
 
         public async Task<Result<RegisterReponseDto>> RegisterFieldOwnerAsync(RegisterFieldOwnerDto request, CancellationToken cancellationToken = default)
@@ -184,7 +189,7 @@
                 {
                     UserId = user.Id,
                     DateOfBirth = request.DateOfBirth,
-                    IsApproved = FieldStatus.Pending
+                    Status = Status.Pending
                 };
 
                 await _fieldOwnerRepo.AddAsync(fieldOwner);
@@ -197,7 +202,7 @@
             }
 
             var error = result.Errors.First();
-            return Result.Failure<RegisterReponseDto>(new Error(error.Code, error.Description, ErrorType.BadRequest));
+            return Result.Failure<RegisterReponseDto>(new DAL.Abstraction.Error(error.Code, error.Description, ErrorType.BadRequest));
         }
 
         public async Task<Result> ConfirmEmailAsync(ConfirmEmailRequestDto request)
@@ -253,7 +258,7 @@
             var isValidOtp = await _emailVerificationService.VerifyForgetPasswordOtpAsync(user, otp);
 
             if (isValidOtp.IsFailure)
-                return Result.Failure(new Error("Invalid.Otp", "The verification code is incorrect.", ErrorType.Unauthorized));
+                return Result.Failure(new DAL.Abstraction.Error("Invalid.Otp", "The verification code is incorrect.", ErrorType.Unauthorized));
 
             return Result.Success();
         }
@@ -273,7 +278,7 @@
             {
                 var error = resetResult.Errors.First();
 
-                return Result.Failure(new Error(error.Code, error.Description, ErrorType.BadRequest));
+                return Result.Failure(new DAL.Abstraction.Error(error.Code, error.Description, ErrorType.BadRequest));
             }
 
             return Result.Success();

@@ -1,5 +1,5 @@
-﻿using Mala3ib.BLL.Contracts.Follow;
-using Mapster;
+﻿using Mala3ib.BLL.Abstraction;
+using Mala3ib.BLL.Contracts.Follow;
 
 namespace Mala3ib.BLL.Service.Implementation
 {
@@ -7,10 +7,13 @@ namespace Mala3ib.BLL.Service.Implementation
     {
         private readonly IFollowRepo _followRepo;
         private readonly IUserRepo _userRepo;
-        public FollowService(IFollowRepo followRepo, IUserRepo userRepo)
+        private readonly ICacheService _cacheService;
+
+        public FollowService(IFollowRepo followRepo, IUserRepo userRepo, ICacheService cacheService)
         {
             _followRepo = followRepo;
             _userRepo = userRepo;
+            _cacheService = cacheService;
         }
 
         public async Task<Result> FollowAsync(string currentUserId, FollowRequestDto request, CancellationToken cancellation = default)
@@ -26,6 +29,9 @@ namespace Mala3ib.BLL.Service.Implementation
 
             if(!result)
                 return Result.Failure(FollowErrors.AlreadyFollowing);
+
+            await _cacheService.RemoveAsync(CacheKeys.ProfileKey(currentUserId), cancellation);
+            await _cacheService.RemoveAsync(CacheKeys.ProfileKey(request.TargetUserId), cancellation);
 
             return Result.Success();
         }
@@ -43,6 +49,9 @@ namespace Mala3ib.BLL.Service.Implementation
 
             if(!result)
                 return Result.Failure(FollowErrors.AlreadyUnfollowed);
+
+            await _cacheService.RemoveAsync(CacheKeys.ProfileKey(currentUserId), cancellation);
+            await _cacheService.RemoveAsync(CacheKeys.ProfileKey(request.TargetUserId), cancellation);
 
             return Result.Success();
         }

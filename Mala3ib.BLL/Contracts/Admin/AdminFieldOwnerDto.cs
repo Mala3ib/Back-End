@@ -11,6 +11,6 @@ namespace Mala3ib.BLL.Contracts.Admin
         string? PhoneNumber,
         DateOnly DateOfBirth,
         [property: JsonConverter(typeof(JsonStringEnumConverter))]
-        FieldStatus Status
+        Status Status
     );
 }

@@ -30,6 +30,9 @@
             services.AddScoped<IAuthService, AuthService>();
             services.AddSingleton<IJwtProvider, JwtProvider>();
 
+            services.AddDistributedMemoryCache();
+            services.AddScoped<ICacheService, CacheService>();
+
             #region Repo
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IPlayerRepo, PlayerRepo>();
